@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindTrack - Gestão de Colaboradores</title>
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+
+    <script src="firebase-config.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        /* Cole todo o seu bloco <style> existente aqui, sem modificações */
+        :root {
+             --bg-main: #F9FAFB; /* */ --bg-widget: #FFFFFF; /* */ --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%); /* */ --primary-accent: #2EC4B6; /* */ --secondary-accent: #8E7AB5; /* */ --text-dark: #374151; /* */ --text-light: #F9FAFB; /* */ --text-muted: #9CA3AF; /* */ --border-color: #E5E7EB; /* */ --color-positive: #34D399; /* */ --color-neutral: #FBBF24; /* */ --color-negative: #FB923C; /* */ --font-title: 'Montserrat', sans-serif; /* */ --font-body: 'Inter', sans-serif; /* */ --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); /* */ --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07); /* */
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } /* */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } /* */
+        * { margin: 0; padding: 0; box-sizing: border-box; } /* */
+        body { font-family: var(--font-body); background-color: var(--bg-main); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; } /* */
+        /* .sidebar { ... } */ /* Injetado */
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; } /* */
+        .page-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; } /* */
+        .page-header h1 { font-family: var(--font-title); font-size: 32px; font-weight: 700; } /* */
+        .page-header p { font-size: 16px; color: var(--text-muted); } /* */
+        .btn { padding: 10px 18px; font-family: var(--font-body); font-size: 14px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; height: 40px; } /* Altura ajustada */
+        .btn-primary { background-color: var(--primary-accent); color: #fff; } /* */
+        .btn-primary:hover:not(:disabled) { background-color: #28a79b; } /* */
+        .btn-primary:disabled { background-color: #9CA3AF; cursor: not-allowed; } /* */
+        .btn-secondary { background: none; border: 1px solid var(--border-color); color: var(--text-dark); }
+        .btn-secondary:hover { background-color: var(--bg-main); }
+        .widget { background-color: var(--bg-widget); padding: 28px; border-radius: 20px; box-shadow: var(--shadow-soft); } /* */
+        .department-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; } /* Minmax ajustado */
+        .department-card { display: flex; flex-direction: column; gap: 20px; opacity: 0; animation: fadeInUp 0.5s ease-out forwards; transition: transform 0.2s ease, box-shadow 0.2s ease; } /* */
+        .department-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-medium); } /* */
+        .department-card .card-header { display: flex; justify-content: space-between; align-items: flex-start; } /* */
+        .department-card .card-header .title { font-family: var(--font-title); font-size: 20px; font-weight: 700; } /* */
+        .department-card .card-header .label { font-size: 14px; color: var(--text-muted); } /* */
+        .department-card .card-header .icon { font-size: 24px; color: var(--secondary-accent); } /* */
+        /* Removido card-stats - não usado aqui */
+        .department-card .card-actions { border-top: 1px solid var(--border-color); padding-top: 20px; display: flex; justify-content: flex-end; gap: 12px; margin-top: auto; /* Empurra para baixo */} /* */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.3s ease; } /* */
+        .modal-content { background-color: var(--bg-widget); border-radius: 20px; padding: 32px; width: 100%; max-width: 700px; box-shadow: var(--shadow-medium); animation: fadeInUp 0.4s ease-out; max-height: 90vh; display: flex; flex-direction: column;} /* Max height e flex */
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-shrink: 0;} /* */
+        .modal-header h2 { font-family: var(--font-title); font-size: 22px; } /* */
+        .modal-close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); } /* */
+        .modal-body { overflow-y: auto; /* Scroll se necessário */ flex-grow: 1;}
+        .access-codes-table { width: 100%; border-collapse: collapse; } /* */
+        .access-codes-table th, .access-codes-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 14px; /* Tamanho ajustado */} /* */
+        .access-codes-table th { font-size: 12px; text-transform: uppercase; color: var(--text-muted); } /* */
+        .access-codes-table td code { background-color: var(--bg-main); padding: 2px 5px; border-radius: 4px; font-size: 0.9em;} /* Estilo para UID */
+        .status-badge { padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; } /* */
+        .status-badge--active { background-color: #ECFDF5; color: #10B981; } /* */
+        /* Formulário no Modal */
+        .form-group { margin-bottom: 20px; } /* */
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; } /* */
+        .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; font-family: var(--font-body); } /* */
+        .form-group select[multiple] { height: 150px; /* Reduzido */ background-color: #fff; } /* */
+        .form-group small { display: block; margin-top: -6px; margin-bottom: 8px; color: var(--text-muted); font-size: 12px;}
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-accent); box-shadow: 0 0 0 3px var(--primary-accent-light); } /* */
+        .modal-footer { padding-top: 24px; margin-top: 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; flex-shrink: 0;} /* */
+        /* Mensagem de loading/erro */
+        .placeholder-message { text-align: center; padding: 40px; color: var(--text-muted); font-style: italic; }
+        .error-message { color: var(--color-danger); }
+        .loading-spinner { margin-right: 8px; }
+
+    </style>
+</head>
+
+<body>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <h1>Gestão de Colaboradores</h1> <p>Gerencie departamentos e visualize colaboradores.</p> </div>
+            <button class="btn btn-primary" id="add-department-btn" disabled>
+                <i class="fa-solid fa-plus"></i> Adicionar Departamento
+            </button>
+        </header>
+
+        <div class="department-grid" id="department-grid-container">
+            <p class="placeholder-message"><i class="fa-solid fa-spinner fa-spin loading-spinner"></i> Carregando departamentos...</p>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="access-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Colaboradores - Carregando...</h2>
+                <button class="modal-close-btn" data-target="access-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body"> <table class="access-codes-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>User ID (UID)</th>
+                            </tr>
+                    </thead>
+                    <tbody id="modal-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="add-department-modal">
+        <div class="modal-content">
+            <form id="add-department-form">
+                <div class="modal-header">
+                    <h2>Adicionar Novo Departamento</h2>
+                    <button type="button" class="modal-close-btn" data-target="add-department-modal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="modal-body"> <div class="form-group">
+                        <label for="dept-name-input">Nome do Departamento</label>
+                        <input type="text" id="dept-name-input" placeholder="Ex: Financeiro, Vendas, TI" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="user-select-input">Atribuir Colaboradores (Opcional)</label>
+                        <small>Segure Ctrl (ou Cmd) para selecionar mais de um. Apenas usuários sem departamento serão listados.</small>
+                        <select multiple id="user-select-input">
+                            <option disabled>Carregando usuários...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-close-btn" data-target="add-department-modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="save-department-btn">
+                        <i class="fa-solid fa-save"></i> Salvar Departamento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Bloco de inicialização padrão
+        if (typeof firebaseConfig !== 'undefined') {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                window.fbAuth = firebase.auth();
+                window.fbDb = firebase.firestore();
+                console.log("Firebase inicializado com sucesso em Colaboradores.html.");
+            } catch (e) {
+                console.error("Erro ao inicializar Firebase:", e);
+                if (e.code !== 'app/duplicate-app') { alert("Erro ao conectar com os serviços."); }
+            }
+        } else {
+            console.error("firebaseConfig não definido!"); alert("Erro crítico de configuração.");
+        }
+    </script>
+
+    <script src="sidebar.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- Seletores ---
+            const gridContainer = document.getElementById('department-grid-container');
+            const accessModal = document.getElementById('access-modal');
+            const addDepartmentModal = document.getElementById('add-department-modal');
+            const addDepartmentForm = document.getElementById('add-department-form');
+            const saveDepartmentBtn = document.getElementById('save-department-btn');
+            const addDepartmentBtn = document.getElementById('add-department-btn'); // Botão principal
+            const modalCloseBtns = document.querySelectorAll('.modal-close-btn');
+            const requiredAdminLevel = 1; // Nível Admin ou menor (0, 1)
+
+            let usersMap = new Map(); // Cache: uid -> { nome, email, departamento, nivelAcesso }
+            let departmentsMap = new Map(); // Cache: deptId -> { name, memberCount (calculado) }
+
+            // --- Validação Inicial ---
+            if (!window.fbAuth || !window.fbDb) {
+                 gridContainer.innerHTML = '<p class="placeholder-message error-message">Erro: Serviços Firebase não inicializados.</p>';
+                 return;
+            }
+            const auth = window.fbAuth;
+            const db = window.fbDb;
+
+            // --- Função para buscar e validar usuário ADMIN ---
+            async function getAdminAndValidateAccess() {
+                const userId = localStorage.getItem('mindtrackToken');
+                 if (!userId) return null;
+                 try {
+                     const userDocRef = db.collection('users').doc(userId);
+                     const docSnap = await userDocRef.get();
+                     if (docSnap.exists) {
+                         const userData = docSnap.data();
+                         // Verifica se é Admin (Nível 0 ou 1)
+                         if (userData.nivelAcesso !== undefined && userData.nivelAcesso <= requiredAdminLevel) {
+                             console.log("Acesso de Admin permitido. Nível:", userData.nivelAcesso);
+                             addDepartmentBtn.disabled = false; // Habilita botão de adicionar
+                             return userData;
+                         }
+                     }
+                 } catch (error) { console.error("Erro ao validar acesso Admin:", error); }
+                 console.warn("Acesso de Admin negado.");
+                 addDepartmentBtn.disabled = true; // Mantém desabilitado
+                 return null; // Acesso negado ou erro
+            }
+
+            // --- FUNÇÃO PARA BUSCAR TODOS OS USUÁRIOS (CACHE) ---
+            async function fetchAllUsers() {
+                // Não busca se o cache já estiver populado e não for admin (evita busca desnecessária)
+                if (usersMap.size > 0 && !(await getAdminAndValidateAccess())) return usersMap;
+                 try {
+                     const usersSnapshot = await db.collection('users').get();
+                     usersMap.clear();
+                     usersSnapshot.forEach(doc => {
+                         const data = doc.data();
+                         // Armazena dados essenciais no cache
+                         usersMap.set(doc.id, {
+                             nome: data.nome || 'N/A',
+                             email: data.email || 'N/A',
+                             departamento: data.departamento || null, // Usar null se não tiver depto
+                             nivelAcesso: data.nivelAcesso !== undefined ? data.nivelAcesso : 5 // Default Colaborador
+                         });
+                     });
+                     console.log(`Cache de ${usersMap.size} usuários atualizado.`);
+                     return usersMap;
+                 } catch (error) {
+                     console.error("Erro ao buscar todos os usuários:", error);
+                     gridContainer.innerHTML = '<p class="placeholder-message error-message">Erro ao carregar dados de colaboradores.</p>';
+                     return new Map();
+                 }
+            }
+
+            // --- FUNÇÃO PARA ABRIR E FECHAR MODAIS (mantida) ---
+            function toggleModal(modalId, show) { /* ...código mantido... */ }
+
+            // --- FUNÇÃO PARA POPULAR O SELECT DE USUÁRIOS (Apenas sem departamento) ---
+             function populateUserSelect() {
+                 const userSelect = document.getElementById('user-select-input');
+                 userSelect.innerHTML = ''; // Limpa
+                 let usersWithoutDeptCount = 0;
+                 // Itera pelo cache de usuários
+                 usersMap.forEach((user, uid) => {
+                     // Adiciona apenas se o usuário NÃO tiver um departamento definido
+                     if (!user.departamento) {
+                         const option = new Option(`${user.nome} (${user.email})`, uid); // Valor é o UID
+                         userSelect.add(option);
+                         usersWithoutDeptCount++;
+                     }
+                 });
+
+                 if (usersWithoutDeptCount === 0) {
+                     userSelect.innerHTML = '<option disabled>Todos os usuários já possuem departamento.</option>';
+                 }
+             }
+
+            // --- FUNÇÃO PARA RENDERIZAR DEPARTAMENTOS ---
+            async function renderDepartments() {
+                gridContainer.innerHTML = '<p class="placeholder-message"><i class="fa-solid fa-spinner fa-spin loading-spinner"></i> Carregando departamentos...</p>';
+                const currentUsersMap = await fetchAllUsers(); // Garante que temos os usuários
+
+                try {
+                    const deptSnapshot = await db.collection('departments').orderBy('name').get(); // Assume campo 'name'
+                    departmentsMap.clear(); // Limpa cache de deptos
+
+                    if (deptSnapshot.empty) {
+                        gridContainer.innerHTML = '<p class="placeholder-message">Nenhum departamento cadastrado ainda.</p>';
+                        return;
+                    }
+
+                    // Calcula contagem de membros para cada departamento
+                    const memberCounts = {};
+                    currentUsersMap.forEach(user => {
+                        if (user.departamento) {
+                             memberCounts[user.departamento] = (memberCounts[user.departamento] || 0) + 1;
+                        }
+                    });
+
+                    gridContainer.innerHTML = ''; // Limpa o container
+                    deptSnapshot.forEach((doc, index) => {
+                        const dept = doc.data();
+                        const deptName = dept.name || 'Departamento Sem Nome';
+                        const count = memberCounts[deptName] || 0; // Pega contagem calculada
+
+                        departmentsMap.set(doc.id, { name: deptName, memberCount: count }); // Atualiza cache de deptos
+
+                        const card = document.createElement('div');
+                        card.className = 'department-card widget';
+                        card.style.animationDelay = `${(index + 1) * 0.1}s`;
+                        card.innerHTML = `
+                            <div class="card-header">
+                                <div>
+                                    <div class="title">${deptName}</div>
+                                    <p class="label">${count} Colaborador${count !== 1 ? 'es' : ''}</p>
+                                </div>
+                                <i class="icon fa-solid fa-building-user"></i>
+                            </div>
+                            <div class="card-actions">
+                                {/* Passa o NOME do depto para o botão */}
+                                <button class="btn btn-secondary btn-manage-access" data-dept-name="${deptName}">
+                                     <i class="fa-solid fa-users"></i> Visualizar Colaboradores
+                                </button>
+                                {/* TODO: Adicionar botões Editar/Remover Depto (para Admins) */}
+                            </div>
+                        `;
+                        gridContainer.appendChild(card);
+                    });
+
+                } catch (error) {
+                    console.error("Erro ao renderizar departamentos:", error);
+                    gridContainer.innerHTML = '<p class="placeholder-message error-message">Ocorreu um erro ao carregar os dados dos departamentos.</p>';
+                }
+            }
+
+            // --- LÓGICA DO MODAL DE ADICIONAR DEPARTAMENTO ---
+            addDepartmentBtn.addEventListener('click', () => {
+                 // Re-busca usuários caso algum tenha sido adicionado/removido desde o load inicial
+                 fetchAllUsers().then(() => {
+                     populateUserSelect(); // Popula a lista APENAS com usuários sem depto
+                     toggleModal('add-department-modal', true); // Abre o modal
+                 });
+            });
+
+             addDepartmentForm.addEventListener('submit', async (e) => {
+                 e.preventDefault();
+                 saveDepartmentBtn.disabled = true;
+                 saveDepartmentBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin loading-spinner"></i> Salvando...';
+
+                 const deptName = document.getElementById('dept-name-input').value.trim();
+                 const selectedUserIds = Array.from(document.getElementById('user-select-input').selectedOptions)
+                                              .map(option => option.value); // Obtém os UIDs
+
+                 if (!deptName) {
+                     alert("Por favor, insira um nome para o departamento.");
+                     saveDepartmentBtn.disabled = false; saveDepartmentBtn.innerHTML = '<i class="fa-solid fa-save"></i> Salvar Departamento';
+                     return;
+                 }
+
+                 // Verifica se o nome do departamento já existe (case-insensitive)
+                 let nameExists = false;
+                 departmentsMap.forEach(dept => {
+                      if (dept.name.toLowerCase() === deptName.toLowerCase()) {
+                          nameExists = true;
+                      }
+                 });
+                 if (nameExists) {
+                     alert(`O departamento "${deptName}" já existe.`);
+                     saveDepartmentBtn.disabled = false; saveDepartmentBtn.innerHTML = '<i class="fa-solid fa-save"></i> Salvar Departamento';
+                     return;
+                 }
+
+
+                 try {
+                     // 1. Adiciona o novo departamento à coleção 'departments'
+                     const deptDocRef = await db.collection('departments').add({
+                         name: deptName,
+                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                         // Não armazena UIDs aqui, pois vamos atualizar o usuário
+                     });
+                     console.log(`Departamento "${deptName}" criado com ID: ${deptDocRef.id}`);
+
+                     // 2. Atualiza o campo 'departamento' dos usuários selecionados (se houver)
+                     if (selectedUserIds.length > 0) {
+                         // Usar Batch Write para atualizar múltiplos usuários atomicamente
+                         const batch = db.batch();
+                         selectedUserIds.forEach(uid => {
+                             const userRef = db.collection('users').doc(uid);
+                             batch.update(userRef, { departamento: deptName });
+                             // Atualiza o cache local imediatamente
+                              if (usersMap.has(uid)) { usersMap.get(uid).departamento = deptName; }
+                         });
+                         await batch.commit();
+                         console.log(`${selectedUserIds.length} usuários atualizados para o departamento ${deptName}.`);
+                     }
+
+                     alert('Departamento criado com sucesso!');
+                     toggleModal('add-department-modal', false);
+                     addDepartmentForm.reset(); // Limpa o formulário
+                     renderDepartments(); // Atualiza a lista de departamentos na tela
+
+                 } catch (error) {
+                     console.error('Erro ao criar departamento ou atualizar usuários:', error);
+                     alert('Ocorreu um erro ao salvar o departamento: ' + error.message);
+                 } finally {
+                     saveDepartmentBtn.disabled = false;
+                     saveDepartmentBtn.innerHTML = '<i class="fa-solid fa-save"></i> Salvar Departamento';
+                 }
+             });
+
+            // --- LÓGICA DO MODAL DE GERENCIAR ACESSOS (Visualizar Colaboradores) ---
+            gridContainer.addEventListener('click', async (event) => {
+                 const button = event.target.closest('.btn-manage-access'); // Encontra o botão
+                 if (button) {
+                     const deptName = button.dataset.deptName;
+                     console.log("Visualizando depto:", deptName);
+
+                     // Certifica que o cache de usuários está atualizado
+                     const currentUsersMap = await fetchAllUsers();
+
+                     const modalTitle = document.getElementById('modal-title');
+                     const modalTableBody = document.getElementById('modal-table-body');
+
+                     modalTitle.textContent = `Colaboradores - ${deptName}`;
+                     modalTableBody.innerHTML = ''; // Limpa a tabela
+
+                     let usersInDept = [];
+                     currentUsersMap.forEach((user, uid) => {
+                         if (user.departamento === deptName) {
+                             usersInDept.push({ uid, ...user });
+                         }
+                     });
+
+                      // Ordena por nome
+                     usersInDept.sort((a, b) => a.nome.localeCompare(b.nome));
+
+
+                     if (usersInDept.length > 0) {
+                         usersInDept.forEach(user => {
+                             const row = modalTableBody.insertRow(); // Usa insertRow
+                             row.innerHTML = `
+                                 <td>${user.nome}</td>
+                                 <td>${user.email}</td>
+                                 <td><code>${user.uid}</code></td>
+                                 {/* <td><span class="status-badge status-badge--active">Ativo</span></td> */} {/* Status Removido */}
+                             `;
+                         });
+                     } else {
+                         modalTableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 20px;">Nenhum colaborador encontrado neste departamento.</td></tr>`;
+                     }
+                     toggleModal('access-modal', true);
+                 }
+            });
+
+            // --- EVENT LISTENERS PARA FECHAR MODAIS (mantido) ---
+            modalCloseBtns.forEach(btn => { /* ...código mantido... */ });
+            window.addEventListener('click', (event) => { /* ...código mantido... */ });
+
+            // --- INÍCIO ---
+            await getAdminAndValidateAccess(); // Verifica se é admin e habilita o botão Add se for
+            renderDepartments(); // Renderiza os departamentos (que chama fetchAllUsers)
+
+        }); // Fim do DOMContentLoaded
+    </script>
+</body>
+</html>

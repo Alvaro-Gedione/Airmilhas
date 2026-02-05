@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindTrack - Ações Diárias</title>
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+
+    <script src="firebase-config.js"></script> <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script> <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"> <style>
+        /* --- Seu CSS existente para :root, body, sidebar, main-content, page-header, actions-grid, action-card --- */
+        /* Cole todo o seu bloco <style> existente aqui, sem modificações */
+        :root {
+            --bg-main: #F9FAFB; /* [cite: 51] */
+            --bg-widget: #FFFFFF; /* [cite: 52] */
+            --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%); /* [cite: 52] */
+            --primary-accent: #2EC4B6; /* [cite: 52] */
+            --secondary-accent: #8E7AB5; /* [cite: 52] */
+            --text-dark: #374151; /* [cite: 52] */
+            --text-light: #F9FAFB; /* [cite: 52] */
+            --text-muted: #9CA3AF; /* [cite: 52] */
+            --border-color: #E5E7EB; /* [cite: 52] */
+            --color-positive: #34D399; /* [cite: 53] */
+            --color-neutral: #FBBF24; /* [cite: 53] */
+            --color-negative: #FB923C; /* [cite: 53] */
+            --font-title: 'Montserrat', sans-serif; /* [cite: 53] */
+            --font-body: 'Inter', sans-serif; /* [cite: 53] */
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); /* [cite: 54] */
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07); /* [cite: 55] */
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); } /* [cite: 56, 57] */
+            to { opacity: 1; transform: translateY(0); } /* [cite: 58] */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; } /* [cite: 58, 59] */
+
+        body {
+            font-family: var(--font-body); /* [cite: 59] */
+            background-color: var(--bg-main); /* [cite: 60] */
+            color: var(--text-dark); /* [cite: 60] */
+            display: flex; /* [cite: 60] */
+            height: 100vh; /* [cite: 60] */
+            overflow: hidden; /* [cite: 60] */
+        }
+
+        /* Sidebar styles (serão maioritariamente injetados por sidebar.js, mas alguns podem ser úteis aqui) */
+        /* .sidebar { width: 260px; ... } */ /* [cite: 61] */
+
+        .main-content {
+            flex-grow: 1; /* [cite: 63] */
+            padding: 40px; /* [cite: 64] */
+            overflow-y: auto; /* [cite: 64] */
+        }
+
+        /* --- ESTILOS ESPECÍFICOS DA TELA DE AÇÕES --- */
+        .page-header { margin-bottom: 32px; } /* [cite: 79] */
+        .page-header h1 { font-family: var(--font-title); font-size: 32px; font-weight: 700; margin-bottom: 8px; } /* [cite: 79, 80] */
+        .page-header p { font-size: 16px; color: var(--text-muted); } /* [cite: 80, 81] */
+
+        .actions-grid {
+            display: grid; /* [cite: 81] */
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* [cite: 82] */
+            gap: 24px; /* [cite: 82] */
+        }
+
+        .action-card {
+            background-color: var(--bg-widget); /* [cite: 82] */
+            padding: 28px; /* [cite: 83] */
+            border-radius: 20px; /* [cite: 83] */
+            box-shadow: var(--shadow-soft); /* [cite: 83] */
+            display: flex; /* [cite: 83] */
+            flex-direction: column; /* [cite: 83] */
+            align-items: center; /* [cite: 83] */
+            text-align: center; /* [cite: 83] */
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* [cite: 84] */
+            cursor: pointer; /* [cite: 84] */
+            opacity: 0; /* [cite: 84] */
+            animation: fadeInUp 0.5s ease-out forwards; /* [cite: 84] */
+        }
+
+        .action-card:hover {
+            transform: translateY(-8px); /* [cite: 85] */
+            box-shadow: var(--shadow-medium); /* [cite: 86] */
+        }
+
+        .action-card .icon-circle {
+            width: 60px; /* [cite: 86] */
+            height: 60px; /* [cite: 87] */
+            border-radius: 50%; /* [cite: 87] */
+            background-color: var(--primary-accent); /* [cite: 87] */
+            color: #fff; /* [cite: 87] */
+            font-size: 24px; /* [cite: 87] */
+            display: flex; /* [cite: 87] */
+            align-items: center; /* [cite: 87] */
+            justify-content: center; /* [cite: 87] */
+            margin-bottom: 16px; /* [cite: 87] */
+        }
+
+        .action-card .title { font-family: var(--font-title); font-size: 20px; font-weight: 700; margin-bottom: 8px; } /* [cite: 88, 89] */
+        .action-card .description { font-size: 14px; color: var(--text-muted); line-height: 1.5; } /* [cite: 89, 90] */
+        .action-card.card-calm .icon-circle { background-color: var(--secondary-accent); } /* [cite: 90, 91] */
+        .action-card.card-focus .icon-circle { background-color: var(--color-neutral); } /* [cite: 91, 92] */
+
+        /* Animação em cascata */
+        .actions-grid>.action-card:nth-child(1) { animation-delay: 0.1s; } /* [cite: 92, 93] */
+        .actions-grid>.action-card:nth-child(2) { animation-delay: 0.2s; } /* [cite: 93, 94] */
+        .actions-grid>.action-card:nth-child(3) { animation-delay: 0.3s; } /* [cite: 94, 95] */
+        /* Adicione mais se tiver mais cartões inicialmente visíveis */
+        .actions-grid>.action-card:nth-child(4) { animation-delay: 0.4s; }
+        .actions-grid>.action-card:nth-child(5) { animation-delay: 0.5s; }
+        .actions-grid>.action-card:nth-child(6) { animation-delay: 0.6s; }
+
+    </style>
+</head>
+
+<body>
+    <div id="sidebar-placeholder"></div> <main class="main-content"> <header class="page-header"> <h1>Ações Diárias</h1> <p>Aqui estão algumas micro-ações personalizadas para o seu dia. Escolha a sua!</p> </header>
+
+        <div class="actions-grid"> <div class="action-card"> <div class="icon-circle"><i class="fa-solid fa-wind"></i></div> <div class="title">Respiração Consciente</div> <div class="description">Um guia de 3 minutos para acalmar a mente e reduzir o estresse.</div> </div>
+
+            <div class="action-card card-calm"> <div class="icon-circle"><i class="fa-solid fa-couch"></i></div> <div class="title">Pausa Ativa</div> <div class="description">Um pequeno alongamento de 2 minutos para liberar a tensão do corpo.</div> </div>
+
+            <div class="action-card card-focus"> <div class="icon-circle"><i class="fa-solid fa-hourglass-half"></i></div> <div class="title">Temporizador Foco</div> <div class="description">Use a técnica Pomodoro por 25 minutos para aumentar a concentração.</div> </div>
+
+            <div class="action-card"> <div class="icon-circle"><i class="fa-solid fa-headphones"></i></div> <div class="title">Música para relaxar</div> <div class="description">Uma playlist de músicas relaxantes para te ajudar a relaxar.</div> </div>
+
+            <div class="action-card card-calm">
+                <div class="icon-circle"><i class="fa-solid fa-heart-pulse"></i></div> <div class="title">Mindful Eating</div> <div class="description">Um guia de 5 minutos para te ajudar a se concentrar e desfrutar das refeições.</div> </div>
+
+            <div class="action-card card-focus"> <div class="icon-circle"><i class="fa-solid fa-book-open-reader"></i></div> <div class="title">Diário de Gratidão</div> <div class="description">Escreva 3 coisas pelas quais você é grato hoje para melhorar o seu humor.</div> </div>
+        </div> </main>
+
+    <script>
+        // Verifica se firebaseConfig existe (do arquivo firebase-config.js)
+        if (typeof firebaseConfig !== 'undefined') {
+            try {
+                // Inicializa o Firebase
+                firebase.initializeApp(firebaseConfig);
+
+                // Define as variáveis globais para acesso fácil
+                window.fbAuth = firebase.auth();
+                window.fbDb = firebase.firestore();
+                // window.fbStorage = firebase.storage(); // Descomente se usar Storage nesta página
+                // window.fbFunctions = firebase.functions(); // Descomente se usar Functions
+
+                console.log("Firebase inicializado com sucesso em Acoes.html.");
+            } catch (e) {
+                console.error("Erro ao inicializar Firebase em Acoes.html:", e);
+                // Evita que erros de inicialização quebrem o resto da página
+                if (e.code !== 'app/duplicate-app') { // Ignora erro de inicialização dupla
+                     alert("Erro ao conectar com os serviços. Tente recarregar a página.");
+                }
+            }
+        } else {
+            console.error("firebaseConfig não está definido! Verifique a inclusão de firebase-config.js.");
+            alert("Erro crítico de configuração. Contate o suporte.");
+        }
+    </script>
+
+    <script src="sidebar.js"></script> <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- POTENCIAL FUTURO: Adicionar interatividade aos cartões ---
+            const actionCards = document.querySelectorAll('.action-card');
+            actionCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const title = card.querySelector('.title').textContent;
+                    console.log(`Ação clicada: ${title}`);
+                    // alert(`Você clicou em: ${title}`);
+
+                    // --- Exemplo de como registrar a ação no Firestore ---
+                    /*
+                    if (window.fbAuth && window.fbAuth.currentUser && window.fbDb) {
+                        const userId = window.fbAuth.currentUser.uid;
+                        const actionData = {
+                            userId: userId,
+                            actionTitle: title,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                            // Você pode adicionar mais detalhes, como categoria, pontos, etc.
+                        };
+
+                        window.fbDb.collection('userActions').add(actionData)
+                            .then(() => {
+                                console.log(`Ação "${title}" registrada para o usuário ${userId}`);
+                                // Adicionar feedback visual (ex: animação no card)
+                            })
+                            .catch(error => {
+                                console.error("Erro ao registrar ação no Firestore:", error);
+                                alert("Não foi possível registrar sua ação. Tente novamente.");
+                            });
+                    } else {
+                        console.warn("Usuário não autenticado ou Firestore não disponível para registrar ação.");
+                        // Poderia redirecionar para login ou mostrar mensagem
+                    }
+                    */
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

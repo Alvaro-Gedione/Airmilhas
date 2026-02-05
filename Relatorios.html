@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindTrack - Relatórios Detalhados</title>
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+
+    <script src="firebase-config.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        /* Cole todo o seu bloco <style> existente aqui, sem modificações */
+        /* --- 1. CONFIGURAÇÕES GLOBAIS E PALETA DE CORES --- */
+        :root {
+            --bg-main: #F9FAFB; /* */
+            --bg-widget: #FFFFFF; /* */
+            --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%); /* */
+            --primary-accent: #2EC4B6; /* */
+            --secondary-accent: #8E7AB5; /* */
+            --text-dark: #374151; /* */
+            --text-light: #F9FAFB; /* */
+            --text-muted: #9CA3AF; /* */
+            --border-color: #E5E7EB; /* */
+            --color-positive: #34D399; /* */
+            --color-neutral: #FBBF24; /* */
+            --color-negative: #FB923C; /* */
+            --font-title: 'Montserrat', sans-serif; /* */
+            --font-body: 'Inter', sans-serif; /* */
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); /* */
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07); /* */
+        }
+        /* --- 2. ANIMAÇÕES --- */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } /* */
+        @keyframes drawPath { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } } /* */
+        @keyframes growBar { from { transform: scaleY(0); } to { transform: scaleY(1); } } /* */
+        /* --- 3. ESTILOS GERAIS E SIDEBAR --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; } /* */
+        body { font-family: var(--font-body); background-color: var(--bg-main); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; } /* */
+        /* .sidebar { ... } */ /* Injetado */
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; } /* */
+        /* --- 4. CABEÇALHO DA PÁGINA --- */
+        .page-header { margin-bottom: 32px; } /* */
+        .page-header h1 { font-family: var(--font-title); font-size: 32px; font-weight: 700; margin-bottom: 8px; } /* */
+        .page-header p { font-size: 16px; color: var(--text-muted); } /* */
+        /* --- 5. ESTILO BASE WIDGET --- */
+        .widget { background-color: var(--bg-widget); padding: 28px; border-radius: 20px; box-shadow: var(--shadow-soft); } /* */
+        .widget-title { font-family: var(--font-title); font-size: 20px; margin-bottom: 24px; } /* */
+        /* --- 6. TELA DE RELATÓRIOS --- */
+        .report-generator { background-color: var(--bg-widget); padding: 24px; border-radius: 16px; box-shadow: var(--shadow-soft); display: flex; align-items: flex-end; /* Alinha itens na base */ gap: 20px; margin-bottom: 32px; flex-wrap: wrap; } /* */
+        .filter-group { display: flex; flex-direction: column; gap: 8px; } /* */
+        .filter-group label { font-size: 14px; font-weight: 500; color: var(--text-muted); } /* */
+        .filter-group select { padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background-color: #fff; font-family: var(--font-body); font-size: 16px; min-width: 180px; height: 44px; /* Altura fixa */ } /* */
+        .report-actions { margin-left: auto; display: flex; gap: 16px; align-self: flex-end; /* Alinha botões na base */} /* */
+        .btn { padding: 12px 20px; font-family: var(--font-body); font-size: 16px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; height: 44px; /* Altura fixa */} /* */
+        .btn i { margin-right: 8px; } /* Espaço ícone */
+        .btn-primary { background-color: var(--primary-accent); color: #fff; } /* */
+        .btn-primary:hover:not(:disabled) { background-color: #28a79b; } /* */
+        .btn-primary:disabled { background-color: var(--text-muted); cursor: not-allowed; } /* */
+        .btn-secondary { background: none; border: 1px solid var(--border-color); color: var(--text-dark); } /* */
+        .btn-secondary:hover { background-color: var(--bg-main); } /* */
+        /* Container do Relatório */
+        .report-container { margin-top: 32px; display: none; /* Começa escondido */ opacity: 0; transition: opacity 0.5s ease-in-out; } /* */
+        .report-container.visible { display: block; opacity: 1; } /* Classe para mostrar */
+        .report-header { border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 28px; } /* */
+        .report-header h2 { font-family: var(--font-title); font-size: 22px; } /* */
+        .report-header p { color: var(--text-muted); } /* */
+        .report-summary { display: flex; gap: 32px; margin-top: 16px; flex-wrap: wrap;} /* */
+        .summary-item { min-width: 150px; } /* Largura mínima */
+        .summary-item .value { font-size: 24px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;} /* */
+        .summary-item .value small { font-size: 0.6em; color: var(--text-muted); font-weight: 500; } /* */
+        .summary-item .label { font-size: 14px; color: var(--text-muted); display: block;} /* */
+        .trend-icon { font-size: 0.8em; } /* Tamanho do ícone de trend */
+        .report-section { margin-bottom: 40px; } /* */
+        /* Gráfico de Barras */
+        .bar-chart-container { display: flex; gap: 24px; align-items: flex-end; width: 100%; height: 250px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-top: 10px;} /* */
+        .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative;} /* */
+        .bar-value-label { position: absolute; top: -25px; /* Acima da barra */ font-size: 12px; font-weight: 600; color: var(--text-dark); }
+        .bar { width: 60%; /* Mais fino */ background-color: var(--secondary-accent); border-radius: 4px 4px 0 0; /* Menos arredondado */ transform-origin: bottom; animation: growBar 0.8s ease-out forwards; transition: background-color 0.3s ease; } /* */
+        .bar-label { font-weight: 500; color: var(--text-muted); font-size: 12px; text-align: center; } /* */
+        /* Cores das barras (exemplo) */
+        .bar.positive { background-color: var(--color-positive); }
+        .bar.neutral { background-color: var(--color-neutral); }
+        .bar.negative { background-color: var(--color-negative); }
+        /* Insights */
+        .report-insights { background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; display: flex; gap: 20px; align-items: flex-start; } /* Borda sólida */
+        .report-insights .icon { font-size: 24px; color: var(--primary-accent); margin-top: 4px; flex-shrink: 0;} /* */
+        .report-insights p { line-height: 1.6; } /* */
+        /* Rodapé */
+        .report-footer { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-color); } /* */
+        /* Placeholders */
+        .placeholder-message { text-align: center; padding: 40px; color: var(--text-muted); font-style: italic; border: 1px dashed var(--border-color); border-radius: 16px; margin-top: 32px;}
+        .loading-spinner { margin-right: 8px;}
+    </style>
+</head>
+
+<body>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Relatórios Detalhados</h1>
+            <p>Filtre e analise os dados de bem-estar para tomar decisões estratégicas.</p>
+        </header>
+
+        <div class="report-generator">
+            <div class="filter-group">
+                <label for="period-select">Período</label>
+                <select id="period-select">
+                    <option value="30">Últimos 30 dias</option>
+                    <option value="90">Últimos 3 meses</option>
+                    <option value="180">Último Semestre</option>
+                    </select>
+            </div>
+            <div class="filter-group">
+                <label for="department-select">Departamento</label>
+                <select id="department-select">
+                    <option value="all">Empresa Inteira</option>
+                    <option value="" disabled>Carregando...</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="metric-select">Métrica Principal</label>
+                <select id="metric-select">
+                    <option value="nivelEstresse" data-label="Nível de Estresse" data-scale="/ 5" data-lower-is-better="true">Nível de Estresse</option>
+                    <option value="humor" data-label="Humor Geral" data-scale="/ 5" data-lower-is-better="false">Humor Geral</option>
+                    <option value="qualidadeSono" data-label="Qualidade do Sono" data-scale="/ 5" data-lower-is-better="false">Qualidade do Sono</option>
+                    <option value="nivelEnergia" data-label="Nível de Energia" data-scale="/ 5" data-lower-is-better="false">Nível de Energia</option>
+                </select>
+            </div>
+            <div class="report-actions">
+                <button id="export-pdf-btn" class="btn btn-secondary" disabled><i class="fa-solid fa-download"></i> Exportar PDF</button> <button id="generate-report-btn" class="btn btn-primary"><i class="fa-solid fa-sync"></i> Gerar Relatório</button>
+            </div>
+        </div>
+
+        <div id="report-output-container" class="report-container widget">
+            <div class="placeholder-message" id="report-placeholder">
+                 <p>Selecione os filtros desejados e clique em "Gerar Relatório" para visualizar os dados.</p>
+             </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Bloco de inicialização padrão
+        if (typeof firebaseConfig !== 'undefined') {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                window.fbAuth = firebase.auth();
+                window.fbDb = firebase.firestore();
+                console.log("Firebase inicializado com sucesso em Relatorios.html.");
+            } catch (e) {
+                console.error("Erro ao inicializar Firebase:", e);
+                if (e.code !== 'app/duplicate-app') { alert("Erro ao conectar com os serviços."); }
+            }
+        } else {
+            console.error("firebaseConfig não definido!"); alert("Erro crítico de configuração.");
+        }
+    </script>
+
+    <script src="sidebar.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Seletores ---
+            const periodSelect = document.getElementById('period-select');
+            const departmentSelect = document.getElementById('department-select');
+            const metricSelect = document.getElementById('metric-select');
+            const generateBtn = document.getElementById('generate-report-btn');
+            const exportPdfBtn = document.getElementById('export-pdf-btn'); // Botão PDF (ainda desabilitado)
+            const reportContainer = document.getElementById('report-output-container');
+            const reportPlaceholder = document.getElementById('report-placeholder');
+            const requiredAccessLevel = 3; // Nível Gerente ou menor
+
+            let usersMap = new Map(); // Cache para dados dos usuários { uid: { nome, departamento } }
+            let departmentsList = []; // Cache para lista de departamentos
+
+            // --- Validação Inicial ---
+            if (!window.fbAuth || !window.fbDb) {
+                 reportContainer.innerHTML = '<p class="placeholder-message error-message">Erro: Serviços Firebase não inicializados.</p>';
+                 reportContainer.classList.add('visible'); // Mostra o erro
+                 return;
+            }
+            const auth = window.fbAuth;
+            const db = window.fbDb;
+
+            // --- Função para buscar e validar usuário ---
+            async function getUserAndValidateAccess() {
+                // (Mesma função de Gerente.html - verifica localStorage e Firestore)
+                const userId = localStorage.getItem('mindtrackToken');
+                 if (!userId) return null;
+                 try {
+                     const userDocRef = db.collection('users').doc(userId);
+                     const docSnap = await userDocRef.get();
+                     if (docSnap.exists) {
+                         const userData = docSnap.data();
+                         if (userData.nivelAcesso !== undefined && userData.nivelAcesso <= requiredAccessLevel) {
+                             return userData;
+                         }
+                     }
+                 } catch (error) { console.error("Erro ao validar acesso:", error); }
+                 return null; // Acesso negado ou erro
+            }
+
+            // --- Função para carregar Departamentos no Filtro ---
+            async function loadDepartmentsFilter() {
+                 try {
+                     const deptSnapshot = await db.collection('departments').orderBy('name').get(); // Assumindo coleção 'departments'
+                     departmentSelect.innerHTML = '<option value="all">Empresa Inteira</option>'; // Reseta
+                     departmentsList = []; // Limpa cache
+                     deptSnapshot.forEach(doc => {
+                         const deptName = doc.data().name;
+                         if (deptName) {
+                             const option = document.createElement('option');
+                             option.value = deptName;
+                             option.textContent = deptName;
+                             departmentSelect.appendChild(option);
+                             departmentsList.push(deptName); // Adiciona ao cache
+                         }
+                     });
+                     console.log("Departamentos carregados:", departmentsList);
+                 } catch (error) {
+                     console.error("Erro ao carregar departamentos:", error);
+                     departmentSelect.innerHTML = '<option value="all">Empresa Inteira</option><option disabled>Erro ao carregar</option>';
+                 }
+            }
+
+             // --- Função para buscar todos os usuários (cache) ---
+             async function fetchAllUsers() {
+                 if (usersMap.size > 0) return usersMap; // Retorna cache se já tiver
+                 try {
+                     const usersSnapshot = await db.collection('users').get();
+                     usersMap.clear();
+                     usersSnapshot.forEach(doc => {
+                         const data = doc.data();
+                         usersMap.set(doc.id, { nome: data.nome || 'N/A', departamento: data.departamento || 'Sem Depto' });
+                     });
+                     console.log(`Cache de ${usersMap.size} usuários criado.`);
+                     return usersMap;
+                 } catch (error) {
+                     console.error("Erro ao buscar todos os usuários:", error);
+                     return new Map(); // Retorna mapa vazio em caso de erro
+                 }
+             }
+
+            // --- Função Principal para Gerar Relatório ---
+            async function generateReport() {
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin loading-spinner"></i> Gerando...';
+                reportContainer.classList.remove('visible'); // Esconde relatório anterior
+                reportPlaceholder.innerHTML = '<p><i class="fa-solid fa-spinner fa-spin loading-spinner"></i> Buscando e processando dados...</p>';
+                reportPlaceholder.style.display = 'block'; // Mostra placeholder de loading
+                 exportPdfBtn.disabled = true; // Desabilita PDF enquanto gera
+
+                 // --- Valida Acesso ---
+                 const managerUser = await getUserAndValidateAccess();
+                 if (!managerUser) {
+                     reportPlaceholder.innerHTML = '<p class="error-message">Acesso negado.</p>';
+                     generateBtn.disabled = false; generateBtn.innerHTML = '<i class="fa-solid fa-sync"></i> Gerar Relatório';
+                     return;
+                 }
+
+
+                // --- Obter Filtros ---
+                const selectedPeriodDays = parseInt(periodSelect.value, 10);
+                const selectedDepartment = departmentSelect.value;
+                const selectedMetricOption = metricSelect.options[metricSelect.selectedIndex];
+                const selectedMetric = selectedMetricOption.value; // 'nivelEstresse', 'humor', etc.
+                const metricLabel = selectedMetricOption.dataset.label;
+                const metricScale = selectedMetricOption.dataset.scale; // "/ 5"
+                const lowerIsBetter = selectedMetricOption.dataset.lowerIsBetter === 'true';
+
+                // --- Calcular Datas ---
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(endDate.getDate() - selectedPeriodDays);
+
+                const prevEndDate = new Date(startDate); // Fim do período anterior é o início do atual
+                prevEndDate.setDate(prevEndDate.getDate() -1); // Um dia antes
+                const prevStartDate = new Date(prevEndDate);
+                prevStartDate.setDate(prevEndDate.getDate() - selectedPeriodDays); // Período anterior com a mesma duração
+
+                const startTimestamp = firebase.firestore.Timestamp.fromDate(startDate);
+                const endTimestamp = firebase.firestore.Timestamp.fromDate(endDate);
+                const prevStartTimestamp = firebase.firestore.Timestamp.fromDate(prevStartDate);
+                const prevEndTimestamp = firebase.firestore.Timestamp.fromDate(prevEndDate);
+
+                console.log(`Período Atual: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`);
+                console.log(`Período Anterior: ${prevStartDate.toLocaleDateString()} - ${prevEndDate.toLocaleDateString()}`);
+
+
+                try {
+                    // --- Buscar Dados ---
+                     const userMap = await fetchAllUsers(); // Garante que o cache de usuários está pronto
+                     console.log("Buscando checkins entre", prevStartDate.toLocaleDateString(), "e", endDate.toLocaleDateString());
+
+                    const checkinsSnapshot = await db.collection('checkins')
+                        .where('timestamp', '>=', prevStartTimestamp) // Pega dados dos dois períodos juntos
+                        .where('timestamp', '<=', endTimestamp)
+                        .get();
+
+                    if (checkinsSnapshot.empty) {
+                        reportPlaceholder.innerHTML = '<p>Nenhum check-in encontrado no período selecionado.</p>';
+                        reportContainer.classList.add('visible'); // Mostra a mensagem no container
+                        generateBtn.disabled = false; generateBtn.innerHTML = '<i class="fa-solid fa-sync"></i> Gerar Relatório';
+                        return;
+                    }
+
+                    // --- Processar e Filtrar Checkins ---
+                    const currentPeriodCheckins = [];
+                    const previousPeriodCheckins = [];
+                    const departmentCheckins = {}; // { DeptName: { current: [], previous: [] } }
+
+                    checkinsSnapshot.forEach(doc => {
+                        const checkin = doc.data();
+                        const checkinTimestamp = checkin.timestamp; // Já é um Timestamp do Firestore
+
+                        // Ignora checkins sem a métrica selecionada (ou com valor inválido)
+                        if (checkin[selectedMetric] === null || checkin[selectedMetric] === undefined || isNaN(checkin[selectedMetric])) {
+                             console.warn(`Checkin ${doc.id} ignorado por falta da métrica ${selectedMetric} ou valor inválido.`);
+                             return;
+                        }
+
+
+                        const user = userMap.get(checkin.userId);
+                        const dept = user ? user.departamento : 'Sem Depto';
+
+                        // Inicializa estrutura departamental se necessário
+                        if (!departmentCheckins[dept]) {
+                            departmentCheckins[dept] = { current: [], previous: [] };
+                        }
+
+                        // Separa por período
+                        if (checkinTimestamp >= startTimestamp && checkinTimestamp <= endTimestamp) {
+                             // Filtra por departamento selecionado AQUI
+                             if (selectedDepartment === 'all' || dept === selectedDepartment) {
+                                 currentPeriodCheckins.push(checkin);
+                             }
+                             departmentCheckins[dept].current.push(checkin); // Guarda todos para cálculo departamental
+                        } else if (checkinTimestamp >= prevStartTimestamp && checkinTimestamp <= prevEndTimestamp) {
+                            if (selectedDepartment === 'all' || dept === selectedDepartment) {
+                                previousPeriodCheckins.push(checkin);
+                            }
+                             departmentCheckins[dept].previous.push(checkin);
+                        }
+                    });
+
+                    // --- Calcular Médias e Trend ---
+                    const calculateAverage = (checkinList, metric) => {
+                         if (!checkinList || checkinList.length === 0) return 0;
+                         const sum = checkinList.reduce((acc, ch) => acc + (ch[metric] || 0), 0);
+                         return sum / checkinList.length;
+                    };
+
+                    const currentAvg = calculateAverage(currentPeriodCheckins, selectedMetric);
+                    const previousAvg = calculateAverage(previousPeriodCheckins, selectedMetric);
+
+                    let trendPercentage = 0;
+                    let trendIcon = 'fa-minus';
+                    let trendColor = 'neutral'; // 'positive', 'negative', 'neutral'
+
+                    if (previousAvg > 0 && currentAvg > 0) {
+                         trendPercentage = ((currentAvg - previousAvg) / previousAvg) * 100;
+                         if (Math.abs(trendPercentage) < 1) { // Mudança pequena é neutra
+                              trendPercentage = 0;
+                              trendIcon = 'fa-minus';
+                              trendColor = 'neutral';
+                         } else if (currentAvg > previousAvg) {
+                              trendIcon = 'fa-arrow-up';
+                              trendColor = lowerIsBetter ? 'negative' : 'positive';
+                         } else {
+                              trendIcon = 'fa-arrow-down';
+                              trendColor = lowerIsBetter ? 'positive' : 'negative';
+                         }
+                    } else if (currentAvg > 0) { // Se só tem dados atuais
+                         trendIcon = 'fa-check'; // Indica que há dados, mas sem comparação
+                         trendColor = 'neutral';
+                         trendPercentage = NaN; // Sem trend
+                    }
+
+
+                    // --- Calcular Médias Departamentais (para o gráfico de barras) ---
+                    const departmentAverages = departmentsList // Usa a lista carregada no início
+                         .map(deptName => {
+                             const deptCurrentCheckins = departmentCheckins[deptName]?.current || [];
+                             return {
+                                 name: deptName,
+                                 average: calculateAverage(deptCurrentCheckins, selectedMetric),
+                                 count: deptCurrentCheckins.length
+                             };
+                         })
+                         .sort((a, b) => (lowerIsBetter ? a.average - b.average : b.average - a.average)); // Ordena (melhor para pior ou vice-versa)
+
+                    // --- Gerar Insights (Simples) ---
+                    let insightsText = `A média ${metricLabel.toLowerCase()} para <strong>${selectedDepartment === 'all' ? 'a Empresa Inteira' : selectedDepartment}</strong> no período foi de <strong>${currentAvg.toFixed(1)}${metricScale}</strong>. `;
+                    if (!isNaN(trendPercentage)) {
+                        if (trendPercentage > 0) insightsText += `Houve um aumento de ${trendPercentage.toFixed(0)}% em relação ao período anterior. `;
+                        else if (trendPercentage < 0) insightsText += `Houve uma redução de ${Math.abs(trendPercentage).toFixed(0)}% em relação ao período anterior. `;
+                        else insightsText += `A média permaneceu estável em relação ao período anterior. `;
+                    } else if (currentAvg > 0) {
+                         insightsText += `Não há dados do período anterior para comparação de tendência. `;
+                    } else {
+                         insightsText = `Não foram encontrados dados suficientes para calcular a média de ${metricLabel.toLowerCase()} para ${selectedDepartment === 'all' ? 'a Empresa Inteira' : selectedDepartment} no período.`;
+                    }
+
+                    // Adiciona insight departamental (ex: departamento com pior/melhor métrica)
+                    if (departmentAverages.length > 1 && selectedDepartment === 'all') {
+                         const worstDept = departmentAverages[0]; // Primeiro após ordenar
+                         const bestDept = departmentAverages[departmentAverages.length - 1]; // Último
+                         insightsText += `O departamento <strong>${worstDept.name}</strong> apresentou a ${lowerIsBetter ? 'menor' : 'maior'} média (${worstDept.average.toFixed(1)}${metricScale}), enquanto <strong>${bestDept.name}</strong> teve a ${lowerIsBetter ? 'maior' : 'menor'} média (${bestDept.average.toFixed(1)}${metricScale}).`;
+                    } else if (departmentAverages.length === 1) {
+                         insightsText += `A média do departamento ${departmentAverages[0].name} foi ${departmentAverages[0].average.toFixed(1)}${metricScale}.`;
+                    }
+
+
+                    // --- Atualizar HTML do Relatório ---
+                    reportContainer.innerHTML = `
+                        <div class="report-header">
+                            <h2>Análise de ${metricLabel}</h2>
+                            <p>Exibindo dados para <strong>${selectedDepartment === 'all' ? 'Empresa Inteira' : selectedDepartment}</strong> (${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}).</p>
+                            <div class="report-summary">
+                                <div class="summary-item">
+                                    <div class="value" style="color: var(--${trendColor === 'positive' ? 'color-positive' : (trendColor === 'negative' ? 'color-negative' : 'text-dark')};)">
+                                        ${currentAvg > 0 ? currentAvg.toFixed(1) : '-'} <small>${currentAvg > 0 ? metricScale : ''}</small>
+                                    </div>
+                                    <div class="label">Média ${metricLabel}</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="value" style="color: var(--${trendColor === 'positive' ? 'color-positive' : (trendColor === 'negative' ? 'color-negative' : 'text-muted')};)">
+                                         ${!isNaN(trendPercentage) ? `<i class="fa-solid ${trendIcon} trend-icon"></i> ${Math.abs(trendPercentage).toFixed(0)}%` : '--'}
+                                    </div>
+                                    <div class="label">vs. Período Anterior</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="value">${currentPeriodCheckins.length}</div>
+                                    <div class="label">Respostas no Período</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${currentAvg > 0 ? ` <div class="report-section">
+                            <h3 class="widget-title">Tendência (Visualização Estática)</h3>
+                            <svg width="100%" height="250" style="overflow: visible;">
+                                <line x1="40" y1="200" x2="98%" y2="200" stroke="var(--border-color)" stroke-width="1"/> <line x1="40" y1="200" x2="40" y2="10" stroke="var(--border-color)" stroke-width="1"/> <path class="line-chart-path" d="M 40 ${200 - (currentAvg * 30)} Q 150 ${200 - ((currentAvg + previousAvg)/2 * 30)}, 250 ${200 - (previousAvg * 30)} T 450 ${200 - (previousAvg * 30)} T 650 ${200 - (currentAvg * 30)}"
+                                    stroke="var(--${lowerIsBetter ? (trendColor === 'positive' ? 'color-positive' : 'color-negative') : (trendColor === 'positive' ? 'color-positive' : 'color-negative')})" fill="none" stroke-width="3" stroke-linecap="round" style="animation-delay: 0.5s;"/>
+                                </svg>
+                        </div>
+
+                        <div class="report-section">
+                            <h3 class="widget-title">Comparativo por Departamento (${metricLabel})</h3>
+                            <div class="bar-chart-container" id="bar-chart-report">
+                                </div>
+                        </div>
+
+                        <div class="report-section">
+                            <h3 class="widget-title">Insights e Recomendações</h3>
+                            <div class="report-insights">
+                                <div class="icon"><i class="fa-solid fa-lightbulb"></i></div>
+                                <p id="report-insights-text">
+                                    ${insightsText}
+                                </p>
+                            </div>
+                        </div>
+                        ` : ''} <div class="report-footer">
+                            <i class="fa-solid fa-lock"></i> Dados agregados e anônimos.
+                        </div>
+                    `;
+
+                     // --- Preenche Gráfico de Barras ---
+                     const barChartContainer = document.getElementById('bar-chart-report');
+                     if (barChartContainer && departmentAverages.length > 0) {
+                         barChartContainer.innerHTML = ''; // Limpa
+                         const maxValue = Math.max(...departmentAverages.map(d => d.average), 1); // Max ou 1 para evitar divisão por zero
+                         const minValue = Math.min(...departmentAverages.map(d => d.average), 5); // Min ou 5
+
+                         departmentAverages.forEach((dept, index) => {
+                             const barHeightPercentage = maxValue > 0 ? (dept.average / 5) * 100 : 0; // Altura relativa a 5
+                             let barColorClass = 'neutral';
+                             // Ajusta cor: Stress (baixo é bom), outros (alto é bom)
+                             const thresholdGood = lowerIsBetter ? 2.5 : 3.8;
+                             const thresholdBad = lowerIsBetter ? 3.8 : 2.5;
+                             if (dept.average <= thresholdGood) barColorClass = lowerIsBetter ? 'positive' : 'negative';
+                             if (dept.average >= thresholdBad) barColorClass = lowerIsBetter ? 'negative' : 'positive';
+
+
+                             const barGroup = document.createElement('div');
+                             barGroup.className = 'bar-group';
+                             barGroup.innerHTML = `
+                                 <div class="bar-value-label">${dept.average > 0 ? dept.average.toFixed(1) : '-'}</div>
+                                 <div class="bar ${barColorClass}" style="height: ${barHeightPercentage.toFixed(0)}%; animation-delay: ${(index * 0.1).toFixed(1)}s;"></div>
+                                 <div class="bar-label">${dept.name} (${dept.count})</div>
+                             `;
+                             barChartContainer.appendChild(barGroup);
+                         });
+                     } else if (barChartContainer) {
+                          barChartContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; width: 100%;">Dados insuficientes para comparativo departamental.</p>';
+                     }
+
+
+                    reportPlaceholder.style.display = 'none'; // Esconde placeholder
+                    reportContainer.classList.add('visible'); // Mostra o relatório gerado
+                    exportPdfBtn.disabled = false; // Habilita PDF (funcionalidade não implementada)
+
+
+                } catch (error) {
+                    console.error("Erro ao gerar relatório:", error);
+                    reportPlaceholder.innerHTML = `<p class="error-message">Ocorreu um erro ao gerar o relatório: ${error.message}</p>`;
+                    reportContainer.classList.add('visible'); // Mostra o container com o erro
+                } finally {
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = '<i class="fa-solid fa-sync"></i> Gerar Relatório';
+                }
+            }
+
+            // --- Event Listeners ---
+            generateBtn.addEventListener('click', generateReport);
+             // TODO: Adicionar listener para exportPdfBtn se for implementar
+
+            // --- Carregamento Inicial ---
+             getUserAndValidateAccess().then(managerUser => {
+                 if (managerUser) {
+                     loadDepartmentsFilter(); // Carrega departamentos no filtro
+                     fetchAllUsers(); // Começa a buscar usuários em background
+                 } else {
+                     reportContainer.innerHTML = '<p class="placeholder-message error-message">Acesso negado.</p>';
+                     reportContainer.classList.add('visible');
+                     // Desabilita filtros e botão se acesso negado
+                     periodSelect.disabled = true;
+                     departmentSelect.disabled = true;
+                     metricSelect.disabled = true;
+                     generateBtn.disabled = true;
+                 }
+             });
+
+
+        }); // Fim do DOMContentLoaded
+    </script>
+</body>
+</html>

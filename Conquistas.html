@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindTrack - Minhas Conquistas</title>
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+
+    <script src="firebase-config.js"></script> <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script> <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"> <style>
+        /* --- Seu CSS existente para :root, body, sidebar, main-content, page-header, etc. --- */
+        /* Cole todo o seu bloco <style> existente aqui */
+        :root {
+            --bg-main: #F9FAFB; /* [cite: 733] */
+            --bg-widget: #FFFFFF; /* [cite: 733] */
+            --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%); /* [cite: 733] */
+            --primary-accent: #2EC4B6; /* [cite: 733] */
+            --secondary-accent: #8E7AB5; /* [cite: 733] */
+            --text-dark: #374151; /* [cite: 733] */
+            --text-light: #F9FAFB; /* [cite: 733] */
+            --text-muted: #9CA3AF; /* [cite: 733] */
+            --border-color: #E5E7EB; /* [cite: 734] */
+            --color-positive: #34D399; /* [cite: 734] */
+            --color-neutral: #FBBF24; /* [cite: 734] */
+            --color-negative: #FB923C; /* [cite: 734] */
+            --font-title: 'Montserrat', sans-serif; /* [cite: 734] */
+            --font-body: 'Inter', sans-serif; /* [cite: 734] */
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); /* [cite: 735] */
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07); /* [cite: 736] */
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); } /* [cite: 738] */
+            to { opacity: 1; transform: translateY(0); } /* [cite: 739] */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; } /* [cite: 740] */
+
+        body {
+            font-family: var(--font-body); /* [cite: 741] */
+            background-color: var(--bg-main); /* [cite: 741] */
+            color: var(--text-dark); /* [cite: 741] */
+            display: flex; /* [cite: 741] */
+            height: 100vh; /* [cite: 741] */
+            overflow: hidden; /* [cite: 742] */
+        }
+
+        /* Sidebar styles (serão injetados por sidebar.js) */
+        /* .sidebar { ... } */ /* [cite: 743] */
+
+        .main-content {
+            flex-grow: 1; /* [cite: 745] */
+            padding: 40px; /* [cite: 745] */
+            overflow-y: auto; /* [cite: 745] */
+        }
+
+        /* --- ESTILOS ESPECÍFICOS DA TELA DE CONQUISTAS --- */
+        .page-header { margin-bottom: 32px; } /* [cite: 760] */
+        .page-header h1 { font-family: var(--font-title); font-size: 32px; font-weight: 700; margin-bottom: 8px; } /* [cite: 761] */
+        .page-header p { font-size: 16px; color: var(--text-muted); } /* [cite: 762] */
+
+        .achievements-grid {
+            display: grid; /*  */
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /*  */
+            gap: 24px; /* Aumentei um pouco o gap */
+        }
+
+        .achievement-card {
+            background-color: var(--bg-widget); /* [cite: 764] */
+            padding: 24px; /* [cite: 764] */
+            border-radius: 16px; /* Bordas um pouco menos arredondadas */
+            box-shadow: var(--shadow-soft); /* [cite: 764] */
+            display: flex; /* [cite: 764] */
+            flex-direction: column; /* [cite: 764] */
+            align-items: center; /* [cite: 764] */
+            text-align: center; /* [cite: 764] */
+            opacity: 0; /* [cite: 765] */
+            animation: fadeInUp 0.5s ease-out forwards; /* [cite: 765] */
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Adicionada transição */
+        }
+         .achievement-card:hover {
+            transform: translateY(-4px); /* Efeito suave ao passar o mouse */
+            box-shadow: var(--shadow-medium);
+         }
+
+        .achievement-card.locked {
+            filter: grayscale(80%); /* Um pouco menos cinza */
+            opacity: 0.7; /*  */
+            cursor: default; /* Indica que não é clicável (visualmente) */
+        }
+         .achievement-card.locked:hover {
+            transform: none; /* Remove efeito hover se bloqueado */
+            box-shadow: var(--shadow-soft);
+         }
+
+        .achievement-card .icon-container {
+            width: 70px; /* Reduzido */
+            height: 70px; /* Reduzido */
+            border-radius: 50%; /* [cite: 767] */
+            background-color: var(--primary-accent); /* [cite: 767] */
+            color: #fff; /* [cite: 767] */
+            font-size: 32px; /* Reduzido */
+            display: flex; /* [cite: 767] */
+            align-items: center; /* [cite: 767] */
+            justify-content: center; /* [cite: 767] */
+            margin-bottom: 16px; /* [cite: 768] */
+            box-shadow: var(--shadow-soft); /* [cite: 768] */
+            flex-shrink: 0; /* Evita que encolha */
+        }
+
+        .achievement-card.locked .icon-container {
+            background-color: var(--border-color); /* [cite: 769] */
+            color: var(--text-muted); /* [cite: 769] */
+        }
+
+        .achievement-card .title {
+            font-family: var(--font-title); /* [cite: 770] */
+            font-size: 16px; /* Reduzido */
+            font-weight: 600; /* Um pouco menos bold */
+            margin-bottom: 6px; /* [cite: 770] */
+            color: var(--text-dark); /* Garante cor escura */
+        }
+
+        .achievement-card .description {
+            font-size: 13px; /* Reduzido */
+            color: var(--text-muted); /* [cite: 771] */
+            line-height: 1.5; /* [cite: 771] */
+        }
+
+        /* Animação em cascata (mantida) */
+        .achievements-grid>.achievement-card:nth-child(1) { animation-delay: 0.1s; } /* [cite: 772] */
+        .achievements-grid>.achievement-card:nth-child(2) { animation-delay: 0.2s; } /* [cite: 773] */
+        .achievements-grid>.achievement-card:nth-child(3) { animation-delay: 0.3s; } /* [cite: 774] */
+        .achievements-grid>.achievement-card:nth-child(4) { animation-delay: 0.4s; } /* [cite: 775] */
+        .achievements-grid>.achievement-card:nth-child(5) { animation-delay: 0.5s; } /* [cite: 776] */
+        .achievements-grid>.achievement-card:nth-child(6) { animation-delay: 0.6s; } /* [cite: 777] */
+        /* Adicione mais se tiver mais conquistas */
+    </style>
+</head>
+
+<body>
+    <div id="sidebar-placeholder"></div> <main class="main-content"> <header class="page-header"> <h1>Minhas Conquistas</h1> <p>Continue sua jornada de bem-estar para desbloquear mais recompensas!</p> </header>
+
+        <div class="achievements-grid" id="achievements-grid-container"> <p>Carregando suas conquistas...</p> </div> </main>
+
+    <script>
+        // Verifica se firebaseConfig existe (do arquivo firebase-config.js)
+        if (typeof firebaseConfig !== 'undefined') {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                window.fbAuth = firebase.auth();
+                window.fbDb = firebase.firestore();
+                console.log("Firebase inicializado com sucesso em Conquistas.html.");
+            } catch (e) {
+                console.error("Erro ao inicializar Firebase em Conquistas.html:", e);
+                if (e.code !== 'app/duplicate-app') {
+                     alert("Erro ao conectar com os serviços. Tente recarregar a página.");
+                }
+            }
+        } else {
+            console.error("firebaseConfig não está definido! Verifique a inclusão de firebase-config.js.");
+            alert("Erro crítico de configuração. Contate o suporte.");
+        }
+    </script>
+
+    <script src="sidebar.js"></script> <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const gridContainer = document.getElementById('achievements-grid-container');
+            const userId = localStorage.getItem('mindtrackToken');
+
+            // --- Verifica se o usuário está logado ---
+            if (!userId) {
+                gridContainer.innerHTML = '<p style="color: red;">Você precisa estar logado para ver suas conquistas. Redirecionando...</p>';
+                setTimeout(() => { window.location.href = './index.html'; }, 2000);
+                return;
+            }
+
+            // --- Lista de Todas as Conquistas Possíveis ---
+            // (Poderia vir do Firestore no futuro)
+            const allAchievements = [
+                { id: "jornada_inicial", title: "Jornada Inicial", description: "Conclua seu primeiro check-in.", icon: "fa-star" },
+                { id: "semana_ouro", title: "Semana de Ouro", description: "Faça check-in por 7 dias seguidos.", icon: "fa-calendar-check" },
+                { id: "mente_ativa", title: "Mente Ativa", description: "Complete 5 ações diárias.", icon: "fa-brain" }, // Descrição ajustada
+                { id: "ajuste_rota", title: "Ajuste de Rota", description: "Identifique um aumento de estresse e complete uma ação de bem-estar.", icon: "fa-fire" }, // [cite: 781]
+                { id: "noite_crianca", title: "A noite é uma Criança", description: "Faça check-in do sono por 10 dias seguidos.", icon: "fa-moon" }, // [cite: 782]
+                { id: "jardineiro_expert", title: "Jardineiro Expert", description: "Desbloqueie todas as flores do seu jardim.", icon: "fa-tree" }, // [cite: 782]
+                // Adicione mais conquistas aqui se necessário
+            ];
+
+            let earnedAchievementIds = []; // Array para guardar os IDs das conquistas ganhas
+
+            // --- Busca Conquistas Ganhas do Firestore ---
+            try {
+                const userDocRef = window.fbDb.collection('users').doc(userId);
+                const userDoc = await userDocRef.get();
+
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    // Assumindo que as conquistas estão num array chamado 'earnedAchievements'
+                    if (userData.earnedAchievements && Array.isArray(userData.earnedAchievements)) {
+                        earnedAchievementIds = userData.earnedAchievements;
+                    }
+                    console.log("Conquistas ganhas encontradas:", earnedAchievementIds);
+                } else {
+                    console.warn("Documento do usuário não encontrado no Firestore.");
+                    // Tratar caso onde o usuário está autenticado mas não tem documento? (Pouco provável no fluxo normal)
+                }
+
+                // Limpa a mensagem de "Carregando..."
+                gridContainer.innerHTML = '';
+
+                // --- Renderiza os Cards ---
+                allAchievements.forEach((ach, index) => {
+                    const isEarned = earnedAchievementIds.includes(ach.id);
+                    const card = document.createElement('div');
+                    card.className = `achievement-card ${isEarned ? '' : 'locked'}`; // Adiciona 'locked' se não foi ganha
+                    card.style.animationDelay = `${(index + 1) * 0.1}s`; // Animação em cascata
+
+                    card.innerHTML = `
+                        <div class="icon-container">
+                            <i class="fa-solid ${ach.icon}"></i>
+                        </div>
+                        <div class="title">${ach.title}</div>
+                        <div class="description">${ach.description}</div>
+                    `;
+                    gridContainer.appendChild(card);
+                });
+
+                 // Mensagem se nenhuma conquista foi definida
+                 if (allAchievements.length === 0) {
+                     gridContainer.innerHTML = '<p>Nenhuma conquista configurada no momento.</p>';
+                 }
+
+
+            } catch (error) {
+                console.error("Erro ao buscar ou renderizar conquistas:", error);
+                gridContainer.innerHTML = '<p style="color: red;">Ocorreu um erro ao carregar suas conquistas. Tente novamente mais tarde.</p>';
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindTrack - Configurações</title>
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+
+    <script src="firebase-config.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        /* Cole todo o seu bloco <style> existente aqui, sem modificações */
+        :root {
+            --bg-main: #F9FAFB;
+            /* */
+            --bg-widget: #FFFFFF;
+            /* */
+            --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%);
+            /* */
+            --primary-accent: #2EC4B6;
+            /* */
+            --primary-accent-light: #E0F2F1;
+            /* */
+            --secondary-accent: #8E7AB5;
+            /* */
+            --text-dark: #374151;
+            /* */
+            --text-light: #F9FAFB;
+            /* */
+            --text-muted: #9CA3AF;
+            /* */
+            --border-color: #E5E7EB;
+            /* */
+            --color-positive: #34D399;
+            /* */
+            --color-neutral: #FBBF24;
+            /* */
+            --color-negative: #FB923C;
+            /* */
+            --color-danger: #F43F5E;
+            /* */
+            --color-danger-light: #FFE4E6;
+            /* */
+            --font-title: 'Montserrat', sans-serif;
+            /* */
+            --font-body: 'Inter', sans-serif;
+            /* */
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            /* */
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+            /* */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* */
+
+        body {
+            font-family: var(--font-body);
+            /* */
+            background-color: var(--bg-main);
+            /* */
+            color: var(--text-dark);
+            /* */
+            display: flex;
+            /* */
+            height: 100vh;
+            /* */
+            overflow: hidden;
+            /* */
+        }
+
+        /* Layout Principal */
+        /* .sidebar { ... } */
+        /* Injetado por sidebar.js */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* */
+
+        /* Header da Página */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        /* */
+        .page-header h1 {
+            font-family: var(--font-title);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        /* */
+        .page-header p {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        /* */
+
+        /* Botões */
+        .btn {
+            padding: 10px 18px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* */
+        .btn-primary {
+            background-color: var(--primary-accent);
+            color: #fff;
+        }
+
+        /* */
+        .btn-primary:hover {
+            background-color: #28a79b;
+        }
+
+        /* */
+        .btn-primary:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* */
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        /* */
+        .btn-secondary:hover {
+            background-color: var(--bg-main);
+        }
+
+        /* */
+        .btn-danger-outline {
+            background: none;
+            border: 1px solid var(--color-danger);
+            color: var(--color-danger);
+        }
+
+        /* */
+        .btn-danger-outline:hover {
+            background-color: var(--color-danger-light);
+            color: #be123c;
+        }
+
+        /* */
+
+        /* Layout das Configurações */
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        /* */
+        .settings-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* */
+        .settings-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        /* */
+        .settings-nav a:hover {
+            background-color: var(--border-color);
+        }
+
+        /* */
+        .settings-nav a.active {
+            background-color: var(--primary-accent-light);
+            color: var(--primary-accent);
+            font-weight: 600;
+        }
+
+        /* */
+        .settings-nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* */
+
+        /* Conteúdo das Abas */
+        .settings-tab-content {
+            display: none;
+        }
+
+        /* */
+        .settings-tab-content.active {
+            display: block;
+        }
+
+        /* */
+
+        /* Card de Configuração */
+        .settings-card {
+            background-color: var(--bg-widget);
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        /* */
+        .settings-card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* */
+        .settings-card-header h3 {
+            font-family: var(--font-title);
+            font-size: 18px;
+        }
+
+        /* */
+        .settings-card-header p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* */
+        .settings-card-body {
+            padding: 24px;
+        }
+
+        /* */
+        .settings-card-footer {
+            padding: 16px 24px;
+            background-color: var(--bg-main);
+            border-top: 1px solid var(--border-color);
+            text-align: right;
+        }
+
+        /* */
+
+        /* Layout do Perfil */
+        .profile-layout {
+            display: flex;
+            align-items: flex-start;
+            /* Mantém alinhamento no topo */
+            gap: 32px;
+        }
+
+        /* */
+        .profile-pic-section {
+            flex-shrink: 0;
+            width: 180px;
+            /* Aumentei um pouco a largura para melhor espaçamento */
+            display: flex;
+            /* Usamos flex para centralizar o conteúdo */
+            flex-direction: column;
+            /* Organiza em coluna */
+            align-items: center;
+            /* Centraliza horizontalmente */
+            text-align: center;
+            /* Garante centralização do texto */
+        }
+
+        /* */
+        .profile-picture-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+            margin: 8px auto 16px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            /* Usamos flex para centralizar as iniciais */
+            align-items: center;
+            /* Centraliza verticalmente */
+            justify-content: center;
+            /* Centraliza horizontalmente */
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 28px;
+            /* Tamanho para as iniciais */
+            font-weight: 600;
+            color: var(--primary-accent);
+        }
+
+        .profile-pic-buttons {
+            display: flex;
+            gap: 8px;
+            /* Espaço entre os botões */
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 8px;
+            /* Espaço antes do texto <small> */
+        }
+
+        .profile-pic-buttons .btn-secondary {
+            flex-grow: 1;
+            /* Faz o botão "Alterar" crescer */
+            padding: 8px 10px;
+            /* Botões um pouco menores */
+            font-size: 13px;
+        }
+
+        /* NOVO: Estilo para o botão "Remover" */
+        #remove-profile-pic-btn {
+            flex-shrink: 0;
+            /* Não encolhe */
+            padding: 8px 12px;
+            font-size: 13px;
+            background-color: transparent;
+            border: 1px solid var(--color-danger);
+            color: var(--color-danger);
+        }
+
+        #remove-profile-pic-btn:hover {
+            background-color: var(--color-danger-light);
+        }
+
+        /* Estilizado */
+        .profile-pic-section small {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* */
+        .profile-details-section {
+            flex-grow: 1;
+        }
+
+        /* */
+
+        /* Grupos de Formulário */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* */
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        /* */
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        /* */
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-family: var(--font-body);
+        }
+
+        /* */
+        .form-group input[type="text"]:focus,
+        .form-group input[type="password"]:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px var(--primary-accent-light);
+        }
+
+        /* */
+
+        /* Notificações (mantido como antes) */
+        .notification-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* */
+        .notification-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        /* */
+        .notification-item:first-child {
+            padding-top: 0;
+        }
+
+        /* */
+        .notification-item-text p {
+            font-weight: 500;
+        }
+
+        /* */
+        .notification-item-text span {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        /* */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        /* */
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        /* */
+        input:checked+.slider {
+            background-color: var(--primary-accent);
+        }
+
+        /* */
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        /* */
+
+        /* Zona de Perigo */
+        .danger-zone {
+            border: 1px solid var(--color-danger-light);
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        /* Aumentei margin-top */
+        .danger-zone .settings-card-header {
+            background-color: var(--color-danger-light);
+            border-bottom: 1px solid #fecdd3;
+        }
+
+        /* */
+        .danger-zone .settings-card-header h3 {
+            color: #be123c;
+        }
+
+        /* */
+        .danger-zone .settings-card-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+        }
+
+        /* Ajustei padding */
+
+        /* Dropdown/Pasta (mantido como antes) */
+        .dropdown-toggle {
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        /* */
+        .dropdown-toggle .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+
+        /* */
+        .dropdown-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+            padding-left: 10px;
+            list-style: none;
+            margin: 0;
+        }
+
+        /* */
+        .nav-item-dropdown.open>.dropdown-menu {
+            max-height: 500px;
+            margin-top: 8px;
+        }
+
+        /* */
+        .nav-item-dropdown.open>.dropdown-toggle .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        /* */
+        .dropdown-menu a {
+            padding-left: 28px;
+        }
+
+        /* */
+
+        /* Tabela de Departamentos (mantida como antes) */
+        .departments-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* */
+        .departments-table th,
+        .departments-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* */
+        .departments-table th {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* */
+        .departments-table td {
+            font-weight: 500;
+        }
+
+        /* */
+        .departments-table .actions {
+            text-align: right;
+        }
+
+        /* */
+        .departments-table .actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        /* */
+        .departments-table .actions button i {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        /* */
+        .departments-table .actions button:hover i {
+            color: var(--text-dark);
+        }
+
+        /* */
+        .departments-table .actions .btn-remove:hover i {
+            color: var(--color-danger);
+        }
+
+        /* */
+    </style>
+</head>
+
+<body>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Configurações</h1>
+            <p>Gerencie suas preferências pessoais, notificações e segurança da sua conta.</p>
+        </header>
+
+        <div class="settings-layout">
+            <nav class="settings-nav">
+                <a href="#" class="active" data-target="perfil"><i class="fa-solid fa-user-cog"></i> Meu Perfil</a>
+                <a href="#" data-target="notificacoes"><i class="fa-solid fa-bell"></i> Notificações</a>
+                <a href="#" data-target="seguranca"><i class="fa-solid fa-shield-halved"></i> Segurança</a> <a href="#"
+                    data-target="ajuda"><i class="fa-solid fa-life-ring"></i> Ajuda e Suporte</a>
+
+                <div class="nav-item-dropdown" data-access="3"> <a href="#" class="dropdown-toggle">
+                        <span><i class="fa-solid fa-building-shield"></i> Gestão da Empresa</span>
+                        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" class="nav-link" data-target="gestao-deptos"><i class="fa-solid fa-sitemap"></i>
+                                Departamentos</a></li>
+                        <li><a href="#" class="nav-link" data-target="gestao-acessos"><i class="fa-solid fa-key"></i>
+                                Códigos de Acesso</a></li>
+                        <li><a href="#" class="nav-link" data-target="gestao-assinatura"><i
+                                    class="fa-solid fa-wallet"></i> Assinatura</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="settings-content">
+
+                <div id="perfil" class="settings-tab-content active">
+                    <div class="settings-card">
+                        <form id="profile-form">
+                            <div class="settings-card-body profile-layout">
+
+                                <div class="profile-pic-section">
+                                    <label>Foto de Perfil</label>
+
+                                    <div id="profile-pic-preview" class="profile-picture-preview">
+                                    </div>
+
+                                    <input type="file" id="user-avatar" accept="image/png, image/jpeg"
+                                        style="display: none;">
+
+                                    <div class="profile-pic-buttons">
+                                        <button type="button" class="btn btn-secondary"
+                                            onclick="document.getElementById('user-avatar').click();">
+                                            <i class="fa-solid fa-camera"></i> Alterar
+                                        </button>
+                                        <button type="button" id="remove-profile-pic-btn" class="btn">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+
+                                    <small>JPG/PNG. Máx 5MB.</small>
+                                </div>
+                                <div class="profile-details-section">
+                                    <div class="form-group">
+                                        <label for="user-name">Nome Completo</label>
+                                        <input type="text" id="user-name" value="Carregando..." required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="user-role">Seu Cargo</label>
+                                        <input type="text" id="user-role" value="Carregando..." required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="user-email">Email (não editável)</label>
+                                        <input type="text" id="user-email" value="Carregando..." disabled
+                                            style="background-color: #f3f4f6; cursor: not-allowed;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-card-footer">
+                                <button type="submit" id="save-profile-btn" class="btn btn-primary">
+                                    <i class="fa-solid fa-save"></i> Salvar Alterações
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="notificacoes" class="settings-tab-content">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3>Preferências de Notificação</h3>
+                            <p>Escolha como e quando quer ser notificado.</p>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="notification-item">
+                                <div class="notification-item-text">
+                                    <p>Lembrete de check-in diário</p>
+                                    <span>Enviaremos um lembrete no seu horário preferido.</span>
+                                </div>
+                                <label class="switch"> <input type="checkbox" id="notify-checkin" checked> <span
+                                        class="slider"></span> </label>
+                            </div>
+                            <div class="notification-item">
+                                <div class="notification-item-text">
+                                    <p>Sugestões de micro-ações</p>
+                                    <span>Receba dicas personalizadas durante o dia.</span>
+                                </div>
+                                <label class="switch"> <input type="checkbox" id="notify-actions" checked> <span
+                                        class="slider"></span> </label>
+                            </div>
+                            <div class="notification-item">
+                                <div class="notification-item-text">
+                                    <p>Resumo semanal do seu bem-estar</p>
+                                    <span>Um relatório da sua jornada toda segunda-feira.</span>
+                                </div>
+                                <label class="switch"> <input type="checkbox" id="notify-summary"> <span
+                                        class="slider"></span> </label>
+                            </div>
+                            <div class="notification-item">
+                                <div class="notification-item-text">
+                                    <p>Avisos sobre novas conquistas</p>
+                                    <span>Seja notificado quando desbloquear um novo marco.</span>
+                                </div>
+                                <label class="switch"> <input type="checkbox" id="notify-achievements" checked> <span
+                                        class="slider"></span> </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="seguranca" class="settings-tab-content">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3>Segurança da Conta</h3>
+                            <p>Altere sua senha para manter sua conta segura.</p>
+                        </div>
+                        <form id="password-form">
+                            <div class="settings-card-body">
+                                <div class="form-group">
+                                    <label for="current-password">Senha Atual</label>
+                                    <input type="password" id="current-password" placeholder="••••••••" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-password">Nova Senha</label>
+                                    <input type="password" id="new-password" placeholder="Mínimo 6 caracteres" required
+                                        minlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirm-new-password">Confirmar Nova Senha</label>
+                                    <input type="password" id="confirm-new-password" placeholder="Repita a nova senha"
+                                        required minlength="6">
+                                </div>
+                            </div>
+                            <div class="settings-card-footer">
+                                <button type="submit" id="save-password-btn" class="btn btn-primary">Alterar
+                                    Senha</button>
+                            </div>
+                        </form>
+
+                        <div class="danger-zone">
+                            <div class="settings-card-header">
+                                <h3>Zona de Perigo</h3>
+                            </div>
+                            <div class="settings-card-body">
+                                <div>
+                                    <strong>Excluir conta</strong>
+                                    <p>Esta ação é permanente e irreversível.</p>
+                                </div>
+                                <button id="delete-account-btn" class="btn btn-danger-outline">Excluir Minha
+                                    Conta</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ajuda" class="settings-tab-content">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3>Central de Ajuda</h3>
+                            <p>Encontre respostas para suas dúvidas ou entre em contato conosco.</p>
+                        </div>
+                        <div class="settings-card-body">
+                            <p>Se precisar de ajuda com a plataforma MindTrack, entre em contato com o suporte através
+                                do email <strong>suporte@mindtrack.com</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="gestao-deptos" class="settings-tab-content">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3>Gerenciar Departamentos</h3>
+                            <p>Adicione ou edite os departamentos da sua empresa.</p>
+                        </div>
+                        <form id="add-dept-form">
+                            <div class="settings-card-body">
+                                <div class="form-group">
+                                    <label for="dept-name">Nome do Novo Departamento</label>
+                                    <input type="text" id="dept-name" placeholder="Ex: Financeiro" required>
+                                </div>
+                            </div>
+                            <div class="settings-card-footer">
+                                <button type="submit" class="btn btn-primary">Adicionar Departamento</button>
+                            </div>
+                        </form>
+                        <div class="settings-card-body" style="padding: 0;">
+                            <table class="departments-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome do Departamento</th>
+                                        <th>Colaboradores</th>
+                                        <th class="actions">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="departments-table-body">
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; padding: 20px;">Carregando
+                                            departamentos...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="gestao-acessos" class="settings-tab-content">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3>Gerenciar Códigos de Acesso</h3>
+                        </div>
+                        <div class="settings-card-body">
+                            <p>Funcionalidade em desenvolvimento.</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="gestao-assinatura" class="settings-tab-content">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3>Gerenciar Assinatura</h3>
+                        </div>
+                        <div class="settings-card-body">
+                            <p>Funcionalidade em desenvolvimento.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Bloco de inicialização padrão
+        if (typeof firebaseConfig !== 'undefined') {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                window.fbAuth = firebase.auth();
+                window.fbDb = firebase.firestore();
+                window.fbStorage = firebase.storage(); // Habilita Storage
+                console.log("Firebase inicializado com sucesso em Configuracoes.html.");
+            } catch (e) {
+                console.error("Erro ao inicializar Firebase:", e);
+                if (e.code !== 'app/duplicate-app') { alert("Erro ao conectar com os serviços."); }
+            }
+        } else {
+            console.error("firebaseConfig não definido!"); alert("Erro crítico de configuração.");
+        }
+    </script>
+
+    <script src="sidebar.js"></script>
+
+    <script>
+        // Função auxiliar para obter iniciais (se não estiver em sidebar.js ou precisar dela antes)
+        function getInitials(name) {
+            if (!name || typeof name !== 'string') return '?';
+            const names = name.trim().split(' ');
+            if (names.length === 0 || names[0] === '') return '?';
+            const firstInitial = names[0][0];
+            const lastInitial = names.length > 1 ? names[names.length - 1][0] : '';
+            return `${firstInitial}${lastInitial}`.toUpperCase();
+        }
+
+        // Variável global para armazenar dados do usuário
+        let localUser = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Verifica se Firebase está pronto ---
+            if (!window.fbAuth || !window.fbDb || !window.fbStorage) {
+                console.error("Firebase não está totalmente inicializado!");
+                alert("Erro ao carregar configurações. Tente recarregar a página.");
+                return;
+            }
+            const auth = window.fbAuth; // Alias para facilitar
+            const db = window.fbDb;
+            const storage = window.fbStorage;
+
+            // --- Lógica para alternar abas (mantida) ---
+            const navLinks = document.querySelectorAll('.settings-nav a[data-target]');
+            const tabContents = document.querySelectorAll('.settings-tab-content');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const targetId = this.getAttribute('data-target');
+                    const targetContent = document.getElementById(targetId);
+
+                    document.querySelectorAll('.settings-nav a').forEach(l => l.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    this.classList.add('active');
+                    if (targetContent) { targetContent.classList.add('active'); }
+
+                    const parentDropdown = this.closest('.nav-item-dropdown');
+                    if (parentDropdown) {
+                        document.querySelectorAll('.dropdown-toggle.active').forEach(t => {
+                            if (t !== parentDropdown.querySelector('.dropdown-toggle')) { t.classList.remove('active'); }
+                        });
+                        parentDropdown.querySelector('.dropdown-toggle').classList.add('active');
+                    } else {
+                        document.querySelectorAll('.dropdown-toggle.active').forEach(t => t.classList.remove('active'));
+                    }
+                });
+            });
+
+            // --- Verificação de Autenticação ---
+            let currentUser = auth.currentUser; // Tenta pegar imediatamente
+            let userId = currentUser ? currentUser.uid : localStorage.getItem('mindtrackToken'); // Fallback
+
+            if (!userId) {
+                console.error("Usuário não autenticado. Redirecionando para login.");
+                window.location.href = './index.html';
+                return;
+            } else if (!currentUser) {
+                console.warn("Usuário não encontrado no Firebase Auth no momento do load, usando ID do localStorage.");
+                // Idealmente, usar onAuthStateChanged, mas continuamos por simplicidade
+            } else {
+                console.log("Usuário autenticado:", userId);
+            }
+
+            // --- Seletores de Elementos do Formulário de Perfil ---
+            const userNameInput = document.getElementById('user-name');
+            const userRoleInput = document.getElementById('user-role');
+            const userEmailInput = document.getElementById('user-email');
+            const profilePicPreview = document.getElementById('profile-pic-preview');
+            const fileInput = document.getElementById('user-avatar');
+            const profileForm = document.getElementById('profile-form');
+            const saveProfileBtn = document.getElementById('save-profile-btn');
+
+            // NOVO: Seleciona o botão de remover
+            const removeProfilePicBtn = document.getElementById('remove-profile-pic-btn');
+
+            // NOVO: Variáveis de estado para a foto
+            let newProfilePicFile = null; // Armazena o ARQUIVO selecionado
+            let isProfilePicRemoved = false; // Flag para saber se o usuário clicou em remover
+
+            // --- Carrega os dados do usuário ---
+            async function loadUserData() {
+                // Tenta carregar do localStorage para exibição rápida
+                const localUserStr = localStorage.getItem('mindtrackUser');
+                let localEmail = ''; // Guarda email do localStorage ou Auth
+                if (localUserStr) {
+                    try {
+                        localUser = JSON.parse(localUserStr);
+                        userNameInput.value = localUser.nome || '';
+                        userRoleInput.value = localUser.cargo || '';
+                        localEmail = localUser.email || '';
+                        if (localUser.profilePicUrl) {
+                            profilePicPreview.style.backgroundImage = `url(${localUser.profilePicUrl})`;
+                            profilePicPreview.textContent = '';
+                        } else {
+                            profilePicPreview.style.backgroundImage = 'none';
+                            profilePicPreview.textContent = getInitials(localUser.nome);
+                        }
+                    } catch (e) { console.error("Erro ao parsear localStorage:", e); }
+                }
+                // Usa email do Auth se disponível e não tiver no localStorage
+                if (!localEmail && auth.currentUser) {
+                    localEmail = auth.currentUser.email;
+                }
+                userEmailInput.value = localEmail || 'N/A';
+
+                // Busca dados atualizados do Firestore
+                try {
+                    const userDocRef = db.collection('users').doc(userId);
+                    const docSnap = await userDocRef.get();
+
+                    if (docSnap.exists) {
+                        const user = docSnap.data();
+                        console.log("Dados do Firestore:", user);
+
+                        // Atualiza a variável global localUser
+                        localUser = user;
+
+                        userNameInput.value = user.nome || '';
+                        userRoleInput.value = user.cargo || '';
+                        userEmailInput.value = user.email || localEmail || 'N/A'; // Prioriza Firestore, depois local/Auth
+
+                        if (user.profilePicUrl) {
+                            profilePicPreview.style.backgroundImage = `url(${user.profilePicUrl})`;
+                            profilePicPreview.textContent = '';
+                        } else {
+                            profilePicPreview.style.backgroundImage = 'none';
+                            profilePicPreview.textContent = getInitials(user.nome);
+                        }
+
+                        // Atualiza o localStorage com os dados mais recentes
+                        const userDataForStorage = {
+                            uid: userId,
+                            email: user.email || localEmail, // Garante que email está no storage
+                            ...user
+                        };
+                        localStorage.setItem('mindtrackUser', JSON.stringify(userDataForStorage));
+
+                        // Chama a atualização da sidebar APÓS carregar os dados
+                        if (typeof updateUserProfileDisplay === 'function') {
+                            updateUserProfileDisplay();
+                        }
+
+                    } else {
+                        console.warn("Documento do usuário não encontrado no Firestore.");
+                        // Mantém os dados do localStorage ou Auth que já foram carregados
+                        if (!profilePicPreview.style.backgroundImage && !profilePicPreview.textContent) profilePicPreview.textContent = '?';
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar dados do usuário no Firestore:', error);
+                    alert("Não foi possível carregar seus dados atualizados. Verifique sua conexão.");
+                }
+            }
+
+            // --- NOVO: Lógica de Preview da Imagem ---
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    // Usuário selecionou um novo arquivo
+                    newProfilePicFile = file;
+                    isProfilePicRemoved = false; // Cancela a remoção, se houver
+
+                    // Usa o FileReader para ler o arquivo localmente
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        // Define a imagem de fundo como o preview
+                        profilePicPreview.style.backgroundImage = `url(${e.target.result})`;
+                        profilePicPreview.textContent = ''; // Limpa as iniciais
+                    };
+                    reader.readAsDataURL(file); // Converte a imagem para um URL de dados
+                }
+            });
+
+            // --- NOVO: Lógica para Remover Foto (Preview) ---
+            removeProfilePicBtn.addEventListener('click', () => {
+                // Seta a flag de remoção
+                isProfilePicRemoved = true;
+
+                // Limpa qualquer arquivo novo que estava selecionado
+                newProfilePicFile = null;
+                fileInput.value = ''; // Limpa o <input>
+
+                // Reseta a visualização para as iniciais
+                profilePicPreview.style.backgroundImage = 'none';
+                profilePicPreview.textContent = getInitials(userNameInput.value);
+            });
+
+            // --- ATUALIZADO: Lógica para Salvar Perfil ---
+            profileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                saveProfileBtn.disabled = true;
+                saveProfileBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+
+                const newName = userNameInput.value;
+                const newRole = userRoleInput.value;
+
+                // Referência ao documento do usuário
+                const userDocRef = db.collection('users').doc(userId);
+
+                // Dados básicos para atualizar
+                const dataToUpdate = {
+                    nome: newName,
+                    cargo: newRole
+                };
+
+                try {
+                    // 1. Lógica da Foto de Perfil
+                    if (isProfilePicRemoved) {
+                        // --- Caso 1: Usuário clicou em "Remover" ---
+                        console.log("Removendo foto de perfil...");
+                        // Adiciona a instrução para DELETAR o campo no Firestore
+                        dataToUpdate.profilePicUrl = firebase.firestore.FieldValue.delete();
+
+                    } else if (newProfilePicFile) {
+                        // --- Caso 2: Usuário selecionou um NOVO arquivo ---
+                        console.log("Enviando nova foto de perfil...");
+                        const filePath = `profilePictures/${userId}/${Date.now()}_${newProfilePicFile.name}`;
+                        const storageRef = storage.ref(filePath);
+
+                        // Faz o upload
+                        const snapshot = await storageRef.put(newProfilePicFile);
+                        // Pega a URL de download
+                        const downloadURL = await snapshot.ref.getDownloadURL();
+
+                        // Adiciona a nova URL aos dados
+                        dataToUpdate.profilePicUrl = downloadURL;
+                    }
+                    // --- Caso 3: Nenhuma alteração na foto (isProfilePicRemoved = false e newProfilePicFile = null) ---
+                    // O objeto dataToUpdate não terá 'profilePicUrl', então o Firestore não o alterará.
+
+                    // 2. Atualiza o Firestore
+                    // Atualiza o documento com nome, cargo e (se houver) a alteração da foto
+                    await userDocRef.update(dataToUpdate);
+                    console.log("Firestore atualizado:", dataToUpdate);
+
+                    // 3. Atualiza o localStorage e a variável localUser
+                    const localUserStr = localStorage.getItem('mindtrackUser');
+                    localUser = localUserStr ? JSON.parse(localUserStr) : { uid: userId };
+                    localUser = { ...localUser, ...dataToUpdate };
+
+                    // Se a foto foi removida, deleta a chave do objeto local também
+                    if (isProfilePicRemoved) {
+                        delete localUser.profilePicUrl;
+                    } else if (newProfilePicFile && dataToUpdate.profilePicUrl) {
+                        localUser.profilePicUrl = dataToUpdate.profilePicUrl;
+                    }
+
+                    localStorage.setItem('mindtrackUser', JSON.stringify(localUser));
+
+                    // 4. Atualiza a sidebar e reseta o estado
+                    if (typeof updateUserProfileDisplay === 'function') {
+                        updateUserProfileDisplay();
+                    }
+
+                    alert('Perfil atualizado com sucesso!');
+
+                } catch (error) {
+                    console.error('Erro ao atualizar perfil (Firestore ou Upload):', error);
+                    alert('Ocorreu um erro ao salvar as alterações: ' + error.message);
+                } finally {
+                    // 5. Limpa o estado e reabilita o botão
+                    saveProfileBtn.disabled = false;
+                    saveProfileBtn.innerHTML = '<i class="fa-solid fa-save"></i> Salvar Alterações';
+
+                    // Reseta as flags e inputs
+                    isProfilePicRemoved = false;
+                    newProfilePicFile = null;
+                    fileInput.value = '';
+
+                    // Recarrega os dados para garantir que a visualização (especialmente as iniciais) 
+                    // esteja 100% correta após a remoção da foto.
+                    await loadUserData();
+                }
+            });
+
+            // --- Lógica para Alterar Senha (mantida, usa reautenticação) ---
+            const passwordForm = document.getElementById('password-form');
+            const savePasswordBtn = document.getElementById('save-password-btn');
+
+            passwordForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                currentUser = auth.currentUser; // Pega o usuário ATUAL
+                if (!currentUser) {
+                    alert("Sessão expirada ou inválida. Faça login novamente.");
+                    // Forçar logout e redirecionamento
+                    auth.signOut().finally(() => { // Use finally para garantir a limpeza
+                        localStorage.clear();
+                        window.location.href = './index.html';
+                    });
+                    return;
+                }
+
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+                // Validações... (mantidas)
+                if (newPassword !== confirmNewPassword) {
+                    alert("A nova senha e a confirmação não coincidem.");
+                    return;
+                }
+                if (newPassword.length < 6) {
+                    alert("A nova senha deve ter pelo menos 6 caracteres.");
+                    return;
+                }
+
+                savePasswordBtn.disabled = true;
+                savePasswordBtn.textContent = 'Alterando...';
+
+                try {
+                    const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, currentPassword);
+                    await currentUser.reauthenticateWithCredential(credential);
+                    console.log("Usuário reautenticado com sucesso.");
+                    await currentUser.updatePassword(newPassword);
+                    console.log("Senha atualizada com sucesso no Firebase Auth.");
+                    alert('Senha alterada com sucesso!');
+                    passwordForm.reset();
+                } catch (error) {
+                    // Tratamento de erro (mantido)...
+                    console.error("Erro ao alterar senha:", error);
+                    let friendlyMessage = 'Ocorreu um erro ao tentar alterar a senha.';
+                    if (error.code === 'auth/wrong-password') { friendlyMessage = 'A senha atual está incorreta.'; }
+                    else if (error.code === 'auth/weak-password') { friendlyMessage = 'A nova senha é muito fraca.'; }
+                    else if (error.code === 'auth/requires-recent-login') { friendlyMessage = 'Esta operação requer login recente. Faça login novamente e tente de novo.'; }
+                    alert(friendlyMessage + ` (${error.code})`);
+                } finally {
+                    savePasswordBtn.disabled = false;
+                    savePasswordBtn.textContent = 'Alterar Senha';
+                }
+            });
+
+            // --- Lógica para Excluir Conta (mantida) ---
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
+            deleteAccountBtn.addEventListener('click', async () => {
+                currentUser = auth.currentUser; // Pega o usuário ATUAL
+                if (!currentUser) {
+                    alert("Sessão expirada. Faça login novamente.");
+                    return;
+                }
+
+                const confirmation = prompt(`ATENÇÃO: Esta ação é irreversível! Todos os seus dados serão permanentemente excluídos. Para confirmar, digite seu email (${currentUser.email}) abaixo:`);
+
+                if (confirmation === currentUser.email) {
+                    const passwordConfirmation = prompt("Digite sua senha atual para confirmar a exclusão:");
+                    if (passwordConfirmation) {
+                        deleteAccountBtn.disabled = true;
+                        deleteAccountBtn.textContent = 'Excluindo...';
+                        try {
+                            const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, passwordConfirmation);
+                            await currentUser.reauthenticateWithCredential(credential);
+
+                            // Excluir Firestore (mantido)
+                            try {
+                                await db.collection('users').doc(userId).delete();
+                                console.log("Documento do usuário excluído do Firestore.");
+                            }
+                            catch (firestoreError) {
+                                console.error("Erro ao excluir do Firestore:", firestoreError);
+                            }
+
+                            // Excluir Auth
+                            await currentUser.delete();
+                            console.log("Conta do Firebase Auth excluída.");
+                            alert("Sua conta foi excluída com sucesso.");
+                            localStorage.clear();
+                            window.location.href = './index.html';
+
+                        } catch (error) {
+                            // Tratamento de erro (mantido)...
+                            console.error("Erro ao excluir conta:", error);
+                            let message = "Erro ao excluir conta.";
+                            if (error.code === 'auth/wrong-password') { message = "Senha incorreta. A exclusão foi cancelada."; }
+                            else if (error.code === 'auth/requires-recent-login') { message = "Esta operação requer login recente. Faça login novamente e tente de novo."; }
+                            alert(message);
+                            deleteAccountBtn.disabled = false;
+                            deleteAccountBtn.textContent = 'Excluir Minha Conta';
+                        }
+                    } else {
+                        alert("Exclusão cancelada.");
+                    }
+                } else if (confirmation !== null) {
+                    alert("Email não confere. Exclusão cancelada.");
+                }
+            });
+
+            // --- Lógica para Gestão de Departamentos (mantida) ---
+            const addDeptForm = document.getElementById('add-dept-form');
+            const deptNameInput = document.getElementById('dept-name');
+            const departmentsTableBody = document.getElementById('departments-table-body');
+
+            async function loadDepartments() {
+                // Código mantido para carregar departamentos
+                try {
+                    const deptsSnapshot = await db.collection('departamentos').get();
+                    departmentsTableBody.innerHTML = '';
+
+                    deptsSnapshot.forEach(doc => {
+                        const dept = doc.data();
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${dept.nome || 'N/A'}</td>
+                        <td>
+                            <button class="btn-delete" data-id="${doc.id}">
+                                <i class="fa-solid fa-trash"></i> Excluir
+                            </button>
+                        </td>
+                    `;
+                        departmentsTableBody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error("Erro ao carregar departamentos:", error);
+                }
+            }
+
+            addDeptForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const deptName = deptNameInput.value.trim();
+
+                if (!deptName) {
+                    alert("Por favor, insira um nome para o departamento.");
+                    return;
+                }
+
+                try {
+                    await db.collection('departamentos').add({
+                        nome: deptName,
+                        criadoPor: userId,
+                        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    deptNameInput.value = '';
+                    alert("Departamento adicionado com sucesso!");
+                    await loadDepartments();
+                } catch (error) {
+                    console.error("Erro ao adicionar departamento:", error);
+                    alert("Erro ao adicionar departamento: " + error.message);
+                }
+            });
+
+            departmentsTableBody.addEventListener('click', async (e) => {
+                if (e.target.closest('.btn-delete')) {
+                    const button = e.target.closest('.btn-delete');
+                    const deptId = button.getAttribute('data-id');
+
+                    if (confirm("Tem certeza que deseja excluir este departamento?")) {
+                        try {
+                            await db.collection('departamentos').doc(deptId).delete();
+                            alert("Departamento excluído com sucesso!");
+                            await loadDepartments();
+                        } catch (error) {
+                            console.error("Erro ao excluir departamento:", error);
+                            alert("Erro ao excluir departamento: " + error.message);
+                        }
+                    }
+                }
+            });
+
+            // --- Carregamento Inicial ---
+            loadUserData(); // Carrega dados do perfil logado
+
+            // *** CORREÇÃO AQUI: Verifica o estilo do ITEM DE NAVEGAÇÃO ***
+            const gestaoDeptosNavLink = document.querySelector('.settings-nav a[data-target="gestao-deptos"]');
+            // Encontra o <li> pai que provavelmente tem o display:none aplicado pelo sidebar.js
+            const gestaoDeptosNavItem = gestaoDeptosNavLink ? gestaoDeptosNavLink.closest('li[data-access]') : null;
+
+            if (gestaoDeptosNavItem && window.getComputedStyle(gestaoDeptosNavItem).display !== 'none') {
+                console.log("Aba Gestão Deptos está visível. Carregando departamentos...");
+                loadDepartments(); // Carrega departamentos APENAS se a aba/link for visível
+            } else {
+                console.log("Aba Gestão Deptos não está visível para este usuário.");
+            }
+
+        }); // Fim do DOMContentLoaded
+    </script>
+</body>
+
+</html>

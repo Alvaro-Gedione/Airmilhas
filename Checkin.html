@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindTrack - Check-in do Dia</title>
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+
+    <script src="firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-main: #F9FAFB;
+            --bg-widget: #FFFFFF;
+            --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%);
+            --primary-accent: #2EC4B6;
+            --secondary-accent: #8E7AB5;
+            --text-dark: #374151;
+            --text-light: #F9FAFB;
+            --text-muted: #9CA3AF;
+            --border-color: #E5E7EB;
+            --color-positive: #34D399;
+            --color-neutral: #FBBF24;
+            --color-negative: #FB923C;
+            --font-title: 'Montserrat', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleUp {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkin-container {
+            background-color: var(--bg-widget);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-medium);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .checkin-header {
+            margin-bottom: 32px;
+            animation: fadeInUp 0.6s ease-out 0.2s;
+        }
+
+        .checkin-header h1 {
+            font-family: var(--font-title);
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .checkin-header p {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .question-group {
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: scaleUp 0.5s ease-out forwards;
+        }
+
+        .question-group.active {
+            opacity: 1;
+            animation: scaleUp 0.5s ease-out forwards;
+        }
+
+        .question-group h2 {
+            font-family: var(--font-title);
+            font-size: 22px;
+            margin-bottom: 24px;
+        }
+
+        .answer-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .answer-option {
+            font-size: 48px;
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+            filter: grayscale(100%);
+            opacity: 0.6;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .answer-option:hover,
+        .answer-option.selected {
+            transform: scale(1.1);
+            filter: grayscale(0);
+            opacity: 1;
+        }
+
+        .answer-option:nth-child(1) {
+            color: #8B5CF6;
+            animation-delay: 0.1s;
+        }
+
+        .answer-option:nth-child(2) {
+            color: #F87171;
+            animation-delay: 0.2s;
+        }
+
+        .answer-option:nth-child(3) {
+            color: #FBBF24;
+            animation-delay: 0.3s;
+        }
+
+        .answer-option:nth-child(4) {
+            color: #34D399;
+            animation-delay: 0.4s;
+        }
+
+        .answer-option:nth-child(5) {
+            color: #2EC4B6;
+            animation-delay: 0.5s;
+        }
+
+        .form-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-family: var(--font-body);
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: #28a79b;
+        }
+
+        #final-message {
+            display: none;
+        }
+
+        #final-message .icon {
+            font-size: 60px;
+            color: var(--color-positive);
+            margin-bottom: 16px;
+        }
+
+        #final-message h2 {
+            font-family: var(--font-title);
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        #final-message p {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="checkin-container">
+        <div class="checkin-header">
+            <h1>Check-in do Dia</h1>
+            <p>Seu jardim agradece por você se conectar consigo mesmo(a).</p>
+        </div>
+
+        <div id="checkin-form">
+
+            <div class="question-group active" data-step="1">
+                <h2>Como está seu humor hoje?</h2>
+                <div class="answer-options">
+                    <span class="answer-option" data-value="1">😔</span>
+                    <span class="answer-option" data-value="2">🙁</span>
+                    <span class="answer-option" data-value="3">😐</span>
+                    <span class="answer-option" data-value="4">😊</span>
+                    <span class="answer-option" data-value="5">🤩</span>
+                </div>
+            </div>
+
+            <div class="question-group" data-step="2">
+                <h2>Qual a sua energia?</h2>
+                <div class="answer-options">
+                    <span class="answer-option" data-value="1">😴</span>
+                    <span class="answer-option" data-value="2">🥱</span>
+                    <span class="answer-option" data-value="3">💪</span>
+                    <span class="answer-option" data-value="4">⚡</span>
+                    <span class="answer-option" data-value="5">🚀</span>
+                </div>
+            </div>
+
+            <div class="question-group" data-step="3">
+                <h2>Como você avalia seu sono?</h2>
+                <div class="answer-options">
+                    <span class="answer-option" data-value="1">😩</span>
+                    <span class="answer-option" data-value="2">😔</span>
+                    <span class="answer-option" data-value="3">😐</span>
+                    <span class="answer-option" data-value="4">🙂</span>
+                    <span class="answer-option" data-value="5">😇</span>
+                </div>
+            </div>
+
+            <div class="form-nav">
+                <button id="prev-btn" class="btn btn-secondary" style="visibility: hidden;"><i
+                        class="fa-solid fa-arrow-left"></i> Voltar</button>
+                <button id="next-btn" class="btn btn-primary" disabled>Próximo <i
+                        class="fa-solid fa-arrow-right"></i></button>
+            </div>
+
+        </div>
+
+        <div id="final-message" class="widget">
+            <div class="icon"><i class="fa-solid fa-seedling"></i></div>
+            <h2>Check-in Concluído!</h2>
+            <p>Sua planta ganhou mais uma gota de orvalho. Volte amanhã para cuidar dela!</p>
+            <a href="./Jornada.html" class="btn btn-primary">Voltar para o Jardim</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('checkin-form');
+        const questions = document.querySelectorAll('.question-group');
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const finalMessage = document.getElementById('final-message');
+
+        let currentStep = 1;
+        const totalSteps = questions.length;
+
+        function updateUI() {
+            questions.forEach(q => q.classList.remove('active'));
+            document.querySelector(`.question-group[data-step="${currentStep}"]`).classList.add('active');
+
+            prevBtn.style.visibility = currentStep > 1 ? 'visible' : 'hidden';
+            nextBtn.textContent = currentStep === totalSteps ? 'Finalizar' : 'Próximo';
+            nextBtn.disabled = true; // Desabilita até uma nova opção ser selecionada
+
+            // Re-bind click listeners for the new active question
+            const currentOptions = document.querySelectorAll(`.question-group.active .answer-option`);
+            currentOptions.forEach(opt => {
+                opt.classList.remove('selected');
+                opt.onclick = () => {
+                    currentOptions.forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    nextBtn.disabled = false;
+                };
+            });
+        }
+
+        nextBtn.onclick = () => {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateUI();
+            } else {
+                form.style.display = 'none';
+                finalMessage.style.display = 'block';
+            }
+        };
+
+        prevBtn.onclick = () => {
+            if (currentStep > 1) {
+                currentStep--;
+                updateUI();
+            }
+        };
+
+        // Initial setup
+        updateUI();
+
+    </script>
+</body>
+
+</html>

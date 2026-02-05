@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindTrack - Central de Alertas</title>
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+
+    <script src="firebase-config.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        /* Cole todo o seu bloco <style> existente aqui, sem modificações */
+        /* --- 1. CONFIGURAÇÕES GLOBAIS --- */
+        :root {
+             --bg-main: #F9FAFB; --bg-widget: #FFFFFF; --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%); --primary-accent: #2EC4B6; --secondary-accent: #8E7AB5; --text-dark: #374151; --text-light: #F9FAFB; --text-muted: #9CA3AF; --border-color: #E5E7EB; --color-positive: #34D399; --color-neutral: #FBBF24; --color-negative: #FB923C; --color-critical: #F43F5E; --font-title: 'Montserrat', sans-serif; --font-body: 'Inter', sans-serif; --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+        }
+        /* --- ANIMAÇÕES --- */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- GERAL --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-body); background-color: var(--bg-main); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+        /* .sidebar { ... } */ /* Injetado */
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        /* --- HEADER --- */
+        .page-header { margin-bottom: 32px; }
+        .page-header h1 { font-family: var(--font-title); font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .page-header p { font-size: 16px; color: var(--text-muted); }
+        /* --- BOTÕES --- */
+        .btn { padding: 10px 18px; font-family: var(--font-body); font-size: 14px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; height: 40px;}
+         .btn i { margin-right: 4px; /* Pequeno ajuste */}
+        .btn-primary { background-color: var(--primary-accent); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background-color: #28a79b; }
+        .btn-primary:disabled { background-color: #9CA3AF; cursor: not-allowed; }
+        .btn-secondary { background-color: #fff; border: 1px solid var(--border-color); color: var(--text-dark); }
+        .btn-secondary:hover { background-color: var(--bg-main); }
+        /* --- TELA DE ALERTAS --- */
+        .alerts-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 32px; }
+        .summary-card { background-color: var(--bg-widget); padding: 24px; border-radius: 16px; box-shadow: var(--shadow-soft); opacity: 0; animation: fadeInUp 0.5s ease-out forwards; }
+        .summary-card .value { font-size: 36px; font-weight: 700; font-family: var(--font-title); }
+        .summary-card .label { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+        .summary-card .value.critical { color: var(--color-critical); }
+        .summary-card .value.attention { color: var(--color-negative); } /* Cor para Atenção */
+        .summary-card:nth-child(1) { animation-delay: 0.1s; } /* Animação cascata */
+        .summary-card:nth-child(2) { animation-delay: 0.2s; }
+        .summary-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .alerts-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); margin-bottom: 24px; }
+        .alerts-tabs a { padding: 12px 20px; text-decoration: none; color: var(--text-muted); font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s ease; cursor: pointer; /* Adicionado cursor */}
+        .alerts-tabs a:hover { color: var(--text-dark); }
+        .alerts-tabs a.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); }
+        .alerts-tabs a .count { font-size: 0.8em; margin-left: 4px; background-color: var(--border-color); color: var(--text-muted); border-radius: 4px; padding: 2px 5px;} /* Contador estilizado */
+         .alerts-tabs a.active .count { background-color: var(--primary-accent-light); color: var(--primary-accent); }
+
+        .alerts-list { display: grid; gap: 20px; }
+        .alert-card { background-color: var(--bg-widget); border-radius: 16px; box-shadow: var(--shadow-soft); display: flex; align-items: stretch; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease; opacity: 0; animation: fadeInUp 0.5s ease-out forwards; }
+        .alert-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-medium); }
+        .alert-indicator { width: 8px; flex-shrink: 0; transition: background-color 0.3s ease;} /* Transição */
+        .alert-card--critical .alert-indicator { background-color: var(--color-critical); }
+        .alert-card--attention .alert-indicator { background-color: var(--color-negative); }
+        .alert-card--info .alert-indicator { background-color: var(--color-positive); }
+        .alert-card--resolved .alert-indicator { background-color: var(--text-muted); }
+        .alert-content { padding: 24px; flex-grow: 1; display: flex; align-items: center; gap: 20px; }
+        .alert-icon { font-size: 24px; flex-shrink: 0;}
+        .alert-card--critical .alert-icon { color: var(--color-critical); }
+        .alert-card--attention .alert-icon { color: var(--color-negative); }
+        .alert-card--info .alert-icon { color: var(--color-positive); }
+        .alert-card--resolved .alert-icon { color: var(--text-muted); }
+        .alert-details { flex-grow: 1; }
+        .alert-details .title { font-size: 18px; font-weight: 600; font-family: var(--font-title); margin-bottom: 4px; }
+        .alert-details .description { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+        .alert-details .timestamp { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+        .alert-actions { display: flex; align-items: center; gap: 12px; padding-right: 24px; flex-shrink: 0;}
+        .alert-actions .btn { height: 36px; padding: 8px 16px; font-size: 13px;} /* Botões menores */
+        /* Mensagem de loading/erro */
+        .placeholder-message { text-align: center; padding: 40px; color: var(--text-muted); font-style: italic; }
+        .error-message { color: var(--color-danger); }
+        .loading-spinner { margin-right: 8px; }
+    </style>
+</head>
+<body>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Central de Alertas</h1>
+            <p>Acompanhe e gerencie os insights proativos sobre o bem-estar da sua equipe.</p>
+        </header>
+
+        <div class="alerts-summary" id="alerts-summary-container">
+            <div class="summary-card">
+                <div class="value" id="active-alerts-count">--</div>
+                <div class="label">Alertas Ativos</div>
+            </div>
+             <div class="summary-card">
+                <div class="value critical" id="critical-alerts-count">--</div>
+                <div class="label">Alta Prioridade</div>
+            </div>
+             <div class="summary-card">
+                <div class="value attention" id="attention-alerts-count">--</div>
+                <div class="label">Média Prioridade</div>
+            </div>
+        </div>
+
+        <nav class="alerts-tabs" id="alerts-tabs-nav">
+            <a href="#" class="active" data-status="active">Ativos (<span class="count" id="active-tab-count">--</span>)</a>
+            <a href="#" data-status="resolved">Resolvidos (<span class="count" id="resolved-tab-count">--</span>)</a>
+        </nav>
+
+        <div class="alerts-list" id="alerts-list-container">
+            <p class="placeholder-message"><i class="fa-solid fa-spinner fa-spin loading-spinner"></i> Carregando alertas...</p>
+        </div>
+
+    </main>
+
+     <script>
+        // Bloco de inicialização padrão
+        if (typeof firebaseConfig !== 'undefined') {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                window.fbAuth = firebase.auth();
+                window.fbDb = firebase.firestore();
+                console.log("Firebase inicializado com sucesso em Alertas.html.");
+            } catch (e) {
+                console.error("Erro ao inicializar Firebase:", e);
+                if (e.code !== 'app/duplicate-app') { alert("Erro ao conectar com os serviços."); }
+            }
+        } else {
+            console.error("firebaseConfig não definido!"); alert("Erro crítico de configuração.");
+        }
+    </script>
+
+    <script src="sidebar.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Seletores ---
+            const summaryContainer = document.getElementById('alerts-summary-container');
+            const activeAlertsCountEl = document.getElementById('active-alerts-count');
+            const criticalAlertsCountEl = document.getElementById('critical-alerts-count');
+            const attentionAlertsCountEl = document.getElementById('attention-alerts-count');
+            const tabsNav = document.getElementById('alerts-tabs-nav');
+            const activeTabCountEl = document.getElementById('active-tab-count');
+            const resolvedTabCountEl = document.getElementById('resolved-tab-count');
+            const listContainer = document.getElementById('alerts-list-container');
+            const requiredAdminLevel = 1; // Nível Admin ou menor
+
+            let currentStatusFilter = 'active'; // Estado inicial
+            let allAlertsCache = []; // Cache simples para todos os alertas buscados
+
+            // --- Validação Inicial ---
+            if (!window.fbAuth || !window.fbDb) {
+                 listContainer.innerHTML = '<p class="placeholder-message error-message">Erro: Serviços Firebase não inicializados.</p>';
+                 return;
+            }
+            const auth = window.fbAuth;
+            const db = window.fbDb;
+
+            // --- Função para buscar e validar usuário ADMIN ---
+             async function validateAdminAccess() {
+                 const userId = localStorage.getItem('mindtrackToken');
+                  if (!userId) return false;
+                  try {
+                      const userDocRef = db.collection('users').doc(userId);
+                      const docSnap = await userDocRef.get();
+                      if (docSnap.exists) {
+                          const userData = docSnap.data();
+                          return userData.nivelAcesso !== undefined && userData.nivelAcesso <= requiredAdminLevel;
+                      }
+                  } catch (error) { console.error("Erro ao validar acesso Admin:", error); }
+                  return false;
+             }
+
+            // --- Função para formatar Timestamp ---
+             function formatTimestamp(timestamp) {
+                 if (!timestamp?.toDate) return 'Data inválida'; // Verifica se é um Timestamp válido
+                 const date = timestamp.toDate();
+                 const now = new Date();
+                 const diffSeconds = Math.floor((now - date) / 1000);
+                 const diffMinutes = Math.floor(diffSeconds / 60);
+                 const diffHours = Math.floor(diffMinutes / 60);
+                 const diffDays = Math.floor(diffHours / 24);
+
+                 if (diffDays > 1) return `Há ${diffDays} dias`;
+                 if (diffDays === 1) return `Ontem`;
+                 if (diffHours > 1) return `Há ${diffHours} horas`;
+                 if (diffHours === 1) return `Há 1 hora`;
+                 if (diffMinutes > 1) return `Há ${diffMinutes} minutos`;
+                 if (diffMinutes === 1) return `Há 1 minuto`;
+                 return `Agora mesmo`;
+             }
+
+             // --- Função para renderizar um card de alerta ---
+             function renderAlertCard(alert) {
+                 const card = document.createElement('div');
+                 card.className = `alert-card alert-card--${alert.type || 'info'} ${alert.status === 'resolved' ? 'alert-card--resolved' : ''}`;
+                 card.dataset.id = alert.id; // Armazena o ID do documento
+
+                 const iconMap = {
+                     critical: 'fa-triangle-exclamation',
+                     attention: 'fa-circle-exclamation', // Ícone diferente para atenção
+                     info: 'fa-circle-info' // Ícone diferente para info
+                 };
+                 const icon = iconMap[alert.type] || 'fa-bell'; // Fallback icon
+
+                 card.innerHTML = `
+                     <div class="alert-indicator"></div>
+                     <div class="alert-content">
+                         <div class="alert-icon"><i class="fa-solid ${icon}"></i></div>
+                         <div class="alert-details">
+                             <div class="title">${alert.title || 'Alerta Sem Título'}</div>
+                             <div class="description">${alert.description || 'Sem descrição.'}</div>
+                             <div class="timestamp">${formatTimestamp(alert.timestamp)}</div>
+                         </div>
+                     </div>
+                     <div class="alert-actions">
+                         ${alert.status === 'active' ? `
+                             <button class="btn btn-secondary btn-view-report" data-alert-info="${alert.department || ''}">Ver Detalhes</button> <button class="btn btn-primary btn-resolve-alert"><i class="fa-solid fa-check"></i> Marcar Resolvido</button>
+                         ` : `
+                             <button class="btn btn-secondary btn-reopen-alert"><i class="fa-solid fa-rotate-left"></i> Reabrir</button> {/* Exemplo */}
+                         `}
+                     </div>
+                 `;
+
+                  // Adiciona listeners aos botões DESTE card específico
+                 const resolveBtn = card.querySelector('.btn-resolve-alert');
+                 if (resolveBtn) {
+                     resolveBtn.addEventListener('click', () => handleResolveAlert(alert.id, resolveBtn));
+                 }
+                 // Adicione listeners para outros botões (Reabrir, Ver Detalhes) aqui se necessário
+
+                 return card;
+             }
+
+             // --- Função para atualizar o status do alerta no Firestore ---
+             async function updateAlertStatus(alertId, newStatus, buttonElement) {
+                 if (!alertId) return;
+                 buttonElement.disabled = true;
+                 buttonElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+                 try {
+                     const alertRef = db.collection('alerts').doc(alertId);
+                     await alertRef.update({ status: newStatus });
+                     console.log(`Alerta ${alertId} atualizado para ${newStatus}`);
+                     // Rebusca e re-renderiza TUDO para refletir a mudança
+                     fetchAllAlertsAndRender();
+                 } catch (error) {
+                     console.error(`Erro ao atualizar alerta ${alertId} para ${newStatus}:`, error);
+                     alert(`Não foi possível ${newStatus === 'resolved' ? 'resolver' : 'reabrir'} o alerta.`);
+                      // Reabilita o botão em caso de erro, restaurando o texto original
+                      buttonElement.disabled = false;
+                       buttonElement.innerHTML = newStatus === 'resolved'
+                           ? '<i class="fa-solid fa-check"></i> Marcar Resolvido'
+                           : '<i class="fa-solid fa-rotate-left"></i> Reabrir'; // Ajuste conforme necessário
+                 }
+             }
+
+             // --- Handler para botão "Marcar Resolvido" ---
+             function handleResolveAlert(alertId, buttonElement) {
+                 console.log("Resolvendo alerta:", alertId);
+                 updateAlertStatus(alertId, 'resolved', buttonElement);
+             }
+              // --- Handler para botão "Reabrir" (se implementar) ---
+             // function handleReopenAlert(alertId, buttonElement) {
+             //     console.log("Reabrindo alerta:", alertId);
+             //     updateAlertStatus(alertId, 'active', buttonElement);
+             // }
+
+
+             // --- Função para renderizar a lista e atualizar contadores ---
+             function renderUI() {
+                 // Filtra os alertas do cache com base no status selecionado
+                 const filteredAlerts = allAlertsCache.filter(alert => alert.status === currentStatusFilter);
+                 // Ordena por timestamp (mais recente primeiro)
+                 filteredAlerts.sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
+
+                 listContainer.innerHTML = ''; // Limpa a lista atual
+
+                 if (filteredAlerts.length === 0) {
+                     listContainer.innerHTML = `<p class="placeholder-message">Nenhum alerta ${currentStatusFilter === 'active' ? 'ativo' : 'resolvido'} encontrado.</p>`;
+                 } else {
+                     filteredAlerts.forEach((alert, index) => {
+                         const card = renderAlertCard(alert);
+                         card.style.animationDelay = `${(index * 0.05).toFixed(2)}s`; // Animação cascata mais rápida
+                         listContainer.appendChild(card);
+                     });
+                 }
+
+                 // Atualiza contadores do Sumário e Abas
+                 const activeAlerts = allAlertsCache.filter(a => a.status === 'active');
+                 const resolvedAlerts = allAlertsCache.filter(a => a.status === 'resolved');
+                 const criticalActive = activeAlerts.filter(a => a.type === 'critical').length;
+                 const attentionActive = activeAlerts.filter(a => a.type === 'attention').length;
+
+                 activeAlertsCountEl.textContent = activeAlerts.length;
+                 criticalAlertsCountEl.textContent = criticalActive;
+                 attentionAlertsCountEl.textContent = attentionActive;
+                 activeTabCountEl.textContent = activeAlerts.length;
+                 resolvedTabCountEl.textContent = resolvedAlerts.length;
+
+                 // Atualiza a aba ativa
+                 tabsNav.querySelectorAll('a').forEach(tab => {
+                     tab.classList.toggle('active', tab.dataset.status === currentStatusFilter);
+                 });
+             }
+
+             // --- Função para buscar TODOS os alertas e renderizar ---
+             async function fetchAllAlertsAndRender() {
+                 listContainer.innerHTML = '<p class="placeholder-message"><i class="fa-solid fa-spinner fa-spin loading-spinner"></i> Carregando alertas...</p>';
+                  // Mostra loading nos contadores também
+                 activeAlertsCountEl.textContent = '...';
+                 criticalAlertsCountEl.textContent = '...';
+                 attentionAlertsCountEl.textContent = '...';
+                 activeTabCountEl.textContent = '...';
+                 resolvedTabCountEl.textContent = '...';
+
+                 try {
+                     const alertsSnapshot = await db.collection('alerts').orderBy('timestamp', 'desc').get();
+                     allAlertsCache = []; // Limpa cache
+                     alertsSnapshot.forEach(doc => {
+                         allAlertsCache.push({ id: doc.id, ...doc.data() });
+                     });
+                     console.log(`Cache de ${allAlertsCache.length} alertas criado.`);
+                     renderUI(); // Renderiza com o filtro atual
+
+                 } catch (error) {
+                     console.error("Erro ao buscar alertas:", error);
+                     listContainer.innerHTML = '<p class="placeholder-message error-message">Ocorreu um erro ao carregar os alertas.</p>';
+                      // Zera contadores em caso de erro
+                     activeAlertsCountEl.textContent = '0';
+                     criticalAlertsCountEl.textContent = '0';
+                     attentionAlertsCountEl.textContent = '0';
+                     activeTabCountEl.textContent = '0';
+                     resolvedTabCountEl.textContent = '0';
+                 }
+             }
+
+             // --- Event Listeners para as Abas ---
+             tabsNav.addEventListener('click', (event) => {
+                 event.preventDefault();
+                 const clickedTab = event.target.closest('a');
+                 if (clickedTab && clickedTab.dataset.status) {
+                     const newStatus = clickedTab.dataset.status;
+                     if (newStatus !== currentStatusFilter) {
+                         currentStatusFilter = newStatus;
+                         console.log("Mudando filtro para:", currentStatusFilter);
+                         renderUI(); // Re-renderiza a lista com o novo filtro (usando o cache)
+                     }
+                 }
+             });
+
+            // --- Carregamento Inicial ---
+             validateAdminAccess().then(isAdmin => {
+                 if (isAdmin) {
+                     fetchAllAlertsAndRender(); // Busca e renderiza se for admin
+                 } else {
+                     listContainer.innerHTML = '<p class="placeholder-message error-message">Acesso negado.</p>';
+                      // Zera contadores
+                     activeAlertsCountEl.textContent = '0';
+                     criticalAlertsCountEl.textContent = '0';
+                     attentionAlertsCountEl.textContent = '0';
+                     activeTabCountEl.textContent = '0';
+                     resolvedTabCountEl.textContent = '0';
+                 }
+             });
+
+        }); // Fim do DOMContentLoaded
+    </script>
+</body>
+</html>

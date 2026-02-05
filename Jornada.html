@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindTrack - Minha Jornada</title>
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+
+    <script src="firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="components/Flor01/Flor01.css">
+
+    <style>
+        :root {
+            --bg-main: #F9FAFB;
+            --bg-widget: #FFFFFF;
+            --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%);
+            --primary-accent: #2EC4B6;
+            --secondary-accent: #8E7AB5;
+            --text-dark: #374151;
+            --text-light: #F9FAFB;
+            --text-muted: #9CA3AF;
+            --border-color: #E5E7EB;
+            --color-positive: #34D399;
+            --color-neutral: #FBBF24;
+            --color-negative: #FB923C;
+            --font-title: 'Montserrat', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+            /* NOVO: Sombra mais forte para o card ativo */
+            --shadow-pop: 0 15px 30px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes growPlant {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes scaleUp {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pollen-float {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-30%, -40px);
+            }
+        }
+
+        .flower.reproducing::after {
+            content: '...';
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: var(--color-neutral);
+            animation: pollen-float 2s infinite ease-out;
+            text-shadow: 0 0 5px var(--color-neutral);
+            z-index: 10;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            display: flex;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+        }
+
+        /* --- Cabeçalho da Jornada --- */
+        .jornada-header {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            animation: fadeIn 0.8s ease-out;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .status-message {
+            font-family: var(--font-title);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-accent);
+            margin-bottom: 12px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .status-description {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 0.6s ease-out 0.2s;
+        }
+
+        .checkin-btn {
+            padding: 16px 32px;
+            font-family: var(--font-title);
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            background: var(--primary-gradient);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out 0.4s;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 1rem;
+        }
+
+        .checkin-btn i {
+            animation: bounce 1.5s infinite;
+        }
+
+        /* --- Estilos do Carrossel --- */
+
+        .card-carousel-container {
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .card-carousel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .pot-card {
+            height: 22rem;
+            width: 18rem;
+            position: relative;
+            z-index: 1;
+            transform: scale(0.6) translateY(-2rem);
+            opacity: 0;
+            cursor: pointer;
+            pointer-events: none;
+            background: linear-gradient(to top, #ffffff, #f9fafb);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            /* MUDADO: Sombra padrão mais forte */
+            box-shadow: var(--shadow-medium);
+            /* MUDADO: Transição mais rápida e suave */
+            transition: 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 10px;
+        }
+
+        /* Sombra do pote */
+        .pot-card::after {
+            content: '';
+            position: absolute;
+            height: 8px;
+            width: 60%;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.15);
+            bottom: -12px;
+            filter: blur(6px);
+            z-index: 0;
+            /* MUDADO: Animação da sombra */
+            transition: 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .pot-card.active {
+            z-index: 3;
+            transform: scale(1) translateY(0) translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+            /* MUDADO: Sombra de destaque */
+            box-shadow: var(--shadow-pop);
+            transition: 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        /* NOVO: Sombra do pote ativo no chão */
+        .pot-card.active::after {
+            width: 70%;
+            bottom: -15px;
+            background-color: rgba(0, 0, 0, 0.2);
+            filter: blur(10px);
+            height: 10px;
+        }
+
+        .pot-card.prev,
+        .pot-card.next {
+            z-index: 2;
+            transform: scale(0.8) translateY(-1rem) translateX(0);
+            opacity: 0.6;
+            pointer-events: auto;
+            transition: 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* NOVO: Contador de plantas */
+        .pot-plant-count {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary-gradient);
+            color: var(--text-light);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 5; /* Acima de outros elementos */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: 0.4s ease;
+            opacity: 0.8;
+            transform: scale(0.95);
+        }
+
+        .pot-card.active .pot-plant-count {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .pot-plant-count i {
+            font-size: 10px;
+        }
+
+        .pot-date {
+            position: absolute;
+            /* MUDADO: Posição ajustada para baixo */
+            top: 45px; 
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .flower-bed {
+            position: center;
+            width: 100%;
+            height: 20rem;
+            margin-bottom: 30px;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .plant-soil {
+            position: absolute;
+            left: 50%;
+            bottom: 10px;
+            transform: translateX(-50%);
+            width: min(60%, 180px);
+            height: 40px;
+            background: linear-gradient(180deg, #a38b7a, #5c4b3e);
+            clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%);
+            border-radius: 0 0 10px 10px;
+            z-index: 1;
+        }
+
+        .plant-soil::after {
+            content: '';
+            position: absolute;
+            height: 8px;
+            width: 80%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.3);
+            bottom: -6px;
+            filter: blur(4px);
+            z-index: -1;
+        }
+
+        /* --- FIM DOS ESTILOS DO CARROSSEL --- */
+
+
+        /* --- ESTILOS DO MODAL (Sem alterações) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease;
+        }
+
+        .checkin-container {
+            background-color: var(--bg-widget);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-medium);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .checkin-container {
+            transform: scale(1);
+        }
+
+        .checkin-header {
+            margin-bottom: 32px;
+        }
+
+        .checkin-header h1 {
+            font-family: var(--font-title);
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .checkin-header p {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .question-group {
+            margin-bottom: 40px;
+            opacity: 0;
+            display: none;
+        }
+
+        .question-group.active {
+            display: block;
+            opacity: 1;
+            animation: scaleUp 0.5s ease-out forwards;
+        }
+
+        .question-group h2 {
+            font-family: var(--font-title);
+            font-size: 22px;
+            margin-bottom: 24px;
+        }
+
+        .answer-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .answer-option {
+            font-size: 48px;
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+            filter: grayscale(100%);
+            opacity: 0.6;
+        }
+
+        .answer-option:hover,
+        .answer-option.selected {
+            transform: scale(1.1);
+            filter: grayscale(0);
+            opacity: 1;
+        }
+
+        .answer-option:nth-child(1) {
+            color: #8B5CF6;
+        }
+
+        .answer-option:nth-child(2) {
+            color: #F87171;
+        }
+
+        .answer-option:nth-child(3) {
+            color: #FBBF24;
+        }
+
+        .answer-option:nth-child(4) {
+            color: #34D399;
+        }
+
+        .answer-option:nth-child(5) {
+            color: #2EC4B6;
+        }
+
+        .form-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-family: var(--font-body);
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: #28a79b;
+        }
+
+        #final-message {
+            display: none;
+        }
+
+        #final-message .icon {
+            font-size: 60px;
+            color: var(--color-positive);
+            margin-bottom: 16px;
+        }
+
+        #final-message h2 {
+            font-family: var(--font-title);
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        #final-message p {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* ============================================== */
+        /* === INÍCIO: REGRAS DE RESPONSIVIDADE MÓVEL === */
+        /* ============================================== */
+
+        @media (max-width: 768px) {
+
+            /* --- Ajustes Gerais de Layout --- */
+            body {
+                /* Permite que o body cresça com o conteúdo,
+                   evitando problemas de 100vh em celulares com barras de endereço */
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .main-content {
+                /* Reduz o preenchimento em telas menores */
+                padding: 20px;
+            }
+
+            /* --- Ajustes de Tipografia --- */
+            .status-message {
+                font-size: 24px; /* Menor que 28px */
+            }
+
+            .status-description {
+                font-size: 15px;
+                max-width: 100%; /* Ocupa a largura total */
+            }
+
+            .checkin-btn {
+                padding: 14px 28px; /* Ligeiramente menor */
+                font-size: 16px; /* Menor que 18px */
+            }
+
+            /* --- Ajustes do Carrossel --- */
+            .pot-card {
+                /* Diminui o tamanho dos potes para caberem melhor */
+                height: 20rem;
+                width: 15rem; /* 240px (de 18rem / 288px) */
+            }
+
+            /* --- Ajustes do Modal de Check-in --- */
+            .checkin-container {
+                /* Reduz o preenchimento interno */
+                padding: 20px;
+                /* Garante que o modal não toque as bordas */
+                width: 90%; 
+            }
+
+            .checkin-header h1 {
+                font-size: 24px; /* Menor que 28px */
+            }
+
+            .checkin-header p {
+                font-size: 15px;
+            }
+
+            .question-group h2 {
+                font-size: 20px; /* Menor que 22px */
+            }
+
+            .answer-options {
+                /* Reduz o espaço entre os emojis */
+                gap: 10px;
+                /* Permite que os emojis quebrem a linha se não couberem */
+                flex-wrap: wrap; 
+            }
+
+            .answer-option {
+                /* Diminui um pouco os emojis */
+                font-size: 40px; /* Menor que 48px */
+            }
+
+            /* --- Ajustes dos Botões do Modal --- */
+            .form-nav {
+                /* Empilha os botões verticalmente */
+                flex-direction: column-reverse; 
+                gap: 10px;
+                align-items: stretch; /* Faz os botões ocuparem 100% da largura */
+            }
+
+            .btn {
+                width: 100%; /* Garante que os botões se estiquem */
+                justify-content: center; /* Centraliza o texto */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="main-content">
+        <div class="jornada-header">
+            <h1 class="status-message">Seu jardim está florescendo!</h1>
+            <p class="status-description">Ótimo trabalho! A consistência de seus check-ins tem feito suas plantas
+                crescerem. Continue assim!</p>
+        </div>
+
+        <div class="card-carousel-container">
+            <div class="card-carousel" id="pot-carousel">
+                </div>
+        </div>
+
+        <button id="open-checkin-btn" class="checkin-btn">
+            <i class="fa-solid fa-pen-to-square"></i> Check-in do Dia
+        </button>
+    </main>
+
+    <div id="checkin-modal" class="modal-overlay">
+        <div class="checkin-container">
+            <div class="checkin-header">
+                <h1>Check-in do Dia</h1>
+                <p>Seu jardim agradece por você se conectar consigo mesmo(a).</p>
+            </div>
+            <div id="checkin-form">
+                <div class="question-group active" data-step="1">
+                    <h2>Como está seu humor hoje?</h2>
+                    <div class="answer-options">
+                        <span class="answer-option" data-value="1">😔</span>
+                        <span class="answer-option" data-value="2">🙁</span>
+                        <span class="answer-option" data-value="3">😐</span>
+                        <span class="answer-option" data-value="4">😊</span>
+                        <span class="answer-option" data-value="5">🤩</span>
+                    </div>
+                </div>
+                <div class="question-group" data-step="2">
+                    <h2>Qual a sua energia?</h2>
+                    <div class="answer-options">
+                        <span class="answer-option" data-value="1">😴</span>
+                        <span class="answer-option" data-value="2">🥱</span>
+                        <span class="answer-option" data-value="3">💪</span>
+                        <span class="answer-option" data-value="4">⚡</span>
+                        <span class="answer-option" data-value="5">🚀</span>
+                    </div>
+                </div>
+                <div class="question-group" data-step="3">
+                    <h2>Como você avalia seu sono?</h2>
+                    <div class="answer-options">
+                        <span class="answer-option" data-value="1">😩</span>
+                        <span class="answer-option" data-value="2">😔</span>
+                        <span class="answer-option" data-value="3">😐</span>
+                        <span class="answer-option" data-value="4">🙂</span>
+                        <span class="answer-option" data-value="5">😇</span>
+                    </div>
+                </div>
+                <div class="form-nav">
+                    <button id="prev-btn" class="btn btn-secondary" style="visibility: hidden;"><i
+                            class="fa-solid fa-arrow-left"></i> Voltar</button>
+                    <button id="next-btn" class="btn btn-primary" disabled>Próximo <i
+                            class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+            <div id="final-message">
+                <div class="icon"><i class="fa-solid fa-seedling"></i></div>
+                <h2>Check-in Concluído!</h2>
+                <p>Sua planta ganhou mais uma gota de orvalho. Volte amanhã para cuidar dela!</p>
+                <button id="close-final-message-btn" class="btn btn-primary">Voltar para o Jardim</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT"
+        crossorigin="anonymous"></script>
+
+    <script>
+        // =========================================================================
+        // SCRIPT DE INICIALIZAÇÃO DO FIREBASE (Sem alterações)
+        // =========================================================================
+        if (typeof firebaseConfig !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+            window.fbAuth = firebase.auth();
+            window.fbDb = firebase.firestore();
+            console.log("Firebase inicializado com sucesso em Jornada.html.");
+        } else {
+            console.error("firebaseConfig não está definido! Verifique a inclusão de firebase-config.js.");
+        }
+    </script>
+
+    <script>
+        // =========================================================================
+        // FUNÇÕES DA FLOR (Sem alterações)
+        // =========================================================================
+        const flower1_template = `
+        <div class="flower__leafs flower__leafs--1">
+            <div class="flower__leaf flower__leaf--1"></div>
+            <div class="flower__leaf flower__leaf--2"></div>
+            <div class="flower__leaf flower__leaf--3"></div>
+            <div class="flower__leaf flower__leaf--4"></div>
+            <div class="flower__white-circle"></div>
+        </div>
+         <div class="flower__line">
+            <div class="flower__line__leaf flower__line__leaf--1"></div>
+            <div class="flower__line__leaf flower__line__leaf--2"></div>
+            <div class="flower__line__leaf flower__line__leaf--3"></div>
+            <div class="flower__line__leaf flower__line__leaf--4"></div>
+            <div class="flower__line__leaf flower__line__leaf--5"></div>
+            <div class="flower__line__leaf flower__line__leaf--6"></div>
+        </div>
+        `;
+
+        function createFlower1(container, options = {}) { // Modificado: recebe o container
+            if (!container) {
+                console.error("Container (flower-bed) não fornecido para createFlower1!");
+                return;
+            }
+            const flowerElement = document.createElement('div');
+            flowerElement.className = 'flower flower--1';
+            flowerElement.innerHTML = flower1_template;
+            flowerElement.style.setProperty('--pos-left', options.x || '0px');
+            flowerElement.style.setProperty('--pos-bottom', options.y || '10%');
+            flowerElement.style.setProperty('--size-scale', options.scale || 1);
+            flowerElement.style.setProperty('--angle', (options.angle || 0) + 'deg');
+            flowerElement.style.setProperty('--base-delay', (options.delay || 0) + 's');
+            if (options.petalColor) {
+                flowerElement.style.setProperty('--petal-color', options.petalColor);
+            }
+            if (options.stemColor) {
+                flowerElement.style.setProperty('--stem-color-light', options.stemColor);
+            }
+            container.appendChild(flowerElement);
+            return flowerElement;
+        }
+        function lerp(start, end, factor) {
+            return start + (end - start) * factor;
+        }
+        function setFlowerGrowth(flowerElement, percentage, baseStemHeight = 70, baseLeafScale = 1) {
+            const stem = flowerElement.querySelector('.flower__line');
+            if (!stem) {
+                console.warn("Elemento .flower__line não encontrado na flor.", flowerElement);
+                return;
+            }
+            const growthFactor = Math.max(0, Math.min(100, percentage)) / 100;
+            const newStemHeight = baseStemHeight * growthFactor;
+            stem.style.height = newStemHeight + 'vmin';
+            const newLeafScale = baseLeafScale * growthFactor;
+            flowerElement.style.setProperty('--leaf-final-scale', newLeafScale);
+            const START_TRANS_X = -50;
+            const START_TRANS_Y = 0;
+            const START_ROT_Y = 0;
+            const CLOSED_ROT_X = 90;
+            const p1_transX = lerp(START_TRANS_X, -10, growthFactor);
+            const p1_transY = lerp(START_TRANS_Y, 1, growthFactor);
+            const p1_rotY = lerp(START_ROT_Y, 40, growthFactor);
+            const p1_rotX = lerp(CLOSED_ROT_X, -50, growthFactor);
+            flowerElement.style.setProperty('--petal1-transform',
+                `translate(${p1_transX}%, ${p1_transY}%) rotateY(${p1_rotY}deg) rotateX(${p1_rotX}deg)`
+            );
+            const p2_transX = lerp(START_TRANS_X, -50, growthFactor);
+            const p2_transY = lerp(START_TRANS_Y, -4, growthFactor);
+            const p2_rotX = lerp(CLOSED_ROT_X, 40, growthFactor);
+            flowerElement.style.setProperty('--petal2-transform',
+                `translate(${p2_transX}%, ${p2_transY}%) rotateX(${p2_rotX}deg)`
+            );
+            const p3_transX = lerp(START_TRANS_X, -90, growthFactor);
+            const p3_transY = lerp(START_TRANS_Y, 1, growthFactor);
+            const p3_rotY = lerp(START_ROT_Y, -40, growthFactor);
+            const p3_rotX = lerp(CLOSED_ROT_X, -50, growthFactor);
+            flowerElement.style.setProperty('--petal3-transform',
+                `translate(${p3_transX}%, ${p3_transY}%) rotateY(${p3_rotY}deg) rotateX(${p3_rotX}deg)`
+            );
+        }
+    </script>
+
+
+    <script>
+        // =========================================================================
+        // NOVO: LÓGICA DO JARDIM (CARROSSEL DE POTES)
+        // =========================================================================
+
+        /**
+         * Formata um timestamp do Firebase para uma data legível (DD/MM/AAAA).
+         */
+        function formatFirebaseTimestamp(timestamp) {
+            if (!timestamp) return "Data indefinida";
+            const date = timestamp.toDate(); // Converte timestamp do Firebase para objeto Date
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Meses são 0-indexados
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        /**
+         * NOVO: Desenha as plantas dentro de um pote específico.
+         */
+        function displayPlantsInPot(plantsInThisPot, flowerBedElement) {
+            // Posições pré-definidas para até 7 plantas DENTRO de um pote
+            const xPos = ['50%', '60%', '40%', '55%', '45%', '65%', '35%'];
+            const scale = [0.3, 0.2, 0.2, 0.25, 0.25, 0.2, 0.2];
+            const angle = [0, 10, -10, 15, -15, 20, -20];
+            const yPos = ['10%', '5%', '5%', '8%', '8%', '3%', '3%'];
+
+            // Ordena as plantas pela data de criação (mais antiga primeiro)
+            plantsInThisPot.sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis());
+
+            plantsInThisPot.forEach((plant, index) => {
+                let newFlower = createFlower1(flowerBedElement, { // Passa o flowerBed correto
+                    x: xPos[index % xPos.length],
+                    y: yPos[index % yPos.length],
+                    scale: scale[index % scale.length],
+                    angle: angle[index % angle.length],
+                    delay: index * 0.1,
+                    petalColor: plant.cor || 'var(--primary-accent)'
+                });
+
+                setFlowerGrowth(newFlower, plant.porcentagemCrescimento);
+
+                if (plant.estado === 'reproducao') {
+                    newFlower.classList.add('reproducing');
+                }
+            });
+        }
+
+        /**
+         * MODIFICADO: Carrega os POTES e, em seguida, as PLANTAS.
+         */
+        async function loadAndDisplayGarden(userId) {
+            if (!userId) {
+                console.log("loadAndDisplayGarden: userId não fornecido.");
+                return;
+            }
+
+            const potCarousel = document.getElementById('pot-carousel');
+            potCarousel.innerHTML = ''; // Limpa o carrossel antigo
+
+            const statusMsg = document.querySelector('.status-message');
+            const statusDesc = document.querySelector('.status-description');
+
+            try {
+                // 1. Buscar todos os POTES do usuário (ordenados do mais antigo para o mais novo)
+                const potesRef = window.fbDb.collection('potes')
+                    .where('userId', '==', userId)
+                    .orderBy('createdAt', 'asc'); // Antigo primeiro
+
+                const potesSnapshot = await potesRef.get();
+
+                if (potesSnapshot.empty) {
+                    statusMsg.textContent = 'Seu jardim está vazio';
+                    statusDesc.textContent = 'Faça seu primeiro check-in para plantar um pote!';
+                    return;
+                }
+
+                // 2. Buscar TODAS as plantas do usuário DE UMA VEZ
+                const allPlantsRef = window.fbDb.collection('planta')
+                    .where('userId', '==', userId)
+                    .orderBy('createdAt', 'asc');
+
+                const allPlantsSnapshot = await allPlantsRef.get();
+                const allPlants = allPlantsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                statusMsg.textContent = 'Sua jornada de potes!';
+                statusDesc.textContent = `Você já cultivou ${potesSnapshot.size} pote(s). Navegue para ver suas criações.`;
+
+                // 3. Iterar sobre os potes e criar os cards
+                potesSnapshot.docs.forEach(potDoc => {
+                    const pot = { id: potDoc.id, ...potDoc.data() };
+
+                    // Criar o card do pote
+                    const potCard = document.createElement('div');
+                    potCard.className = 'pot-card';
+                    potCard.dataset.potId = pot.id; // Guarda o ID para referência
+
+                    // Filtrar plantas que pertencem a ESTE pote
+                    const plantsInThisPot = allPlants.filter(p => p.poteId === pot.id);
+
+                    // *** MUDANÇA AQUI ***
+                    // Adicionar contador, data, canteiro e vaso
+                    potCard.innerHTML = `
+                        <div class="pot-plant-count">
+                            <i class="fa-solid fa-seedling"></i>
+                            <span>${plantsInThisPot.length} / 7</span>
+                        </div>
+                        <div class="pot-date">Criado em: ${formatFirebaseTimestamp(pot.createdAt)}</div>
+                        <div class="flower-bed" id="flower-bed-${pot.id}">
+                        </div>
+                        <div class="plant-soil"></div>
+                    `;
+                    // *** FIM DA MUDANÇA ***
+
+                    potCarousel.appendChild(potCard);
+
+                    // Encontrar o canteiro (flower-bed) que acabamos de criar
+                    const flowerBedElement = potCard.querySelector(`#flower-bed-${pot.id}`);
+
+                    // Popular este canteiro com suas plantas
+                    displayPlantsInPot(plantsInThisPot, flowerBedElement);
+                });
+
+                // 4. Inicializar o carrossel (jQuery)
+                initializeCarousel();
+
+            } catch (error) {
+                console.error("Erro ao carregar o jardim de potes:", error);
+                statusMsg.textContent = 'Erro ao carregar jardim';
+                statusDesc.textContent = 'Não foi possível buscar seus potes. Tente recarregar a página.';
+            }
+        }
+
+        // --- Lógica de crescimento da planta (sem alterações) ---
+        function getColorForHealth(percentage) {
+            if (percentage >= 100) return '#FF69B4'; // 1. Reprodução (Rosa Choque)
+            if (percentage > 70) return '#2EC4B6';  // 2. Saudável (Verde-água)
+            if (percentage > 30) return '#FBBF24';   // 3. Neutro (Amarelo)
+            return '#9CA3AF';                // 4. Morrendo (Cinza)
+        }
+
+        async function handlePlantGrowth(userId, checkinData) {
+            // (Esta função permanece exatamente como estava no seu arquivo original)
+            if (!userId || !checkinData) {
+                console.error("handlePlantGrowth: Faltando userId ou checkinData");
+                return;
+            }
+            const db = window.fbDb;
+            const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+            const totalScore = (checkinData.humor || 0) + (checkinData.nivelEnergia || 0) + (checkinData.qualidadeSono || 0);
+            let growthAmount = 0;
+            if (totalScore === 15) growthAmount = 50;
+            else if (totalScore >= 13) growthAmount = 25;
+            else if (totalScore >= 11) growthAmount = 15;
+            else if (totalScore >= 9) growthAmount = 10;
+            else if (totalScore >= 7) growthAmount = 5;
+            else if (totalScore >= 5) growthAmount = 0;
+            else growthAmount = -25;
+
+            let initialGrowth = Math.max(0, growthAmount);
+            let initialColor = getColorForHealth(initialGrowth);
+
+            try {
+                const potesRef = db.collection('potes').where('userId', '==', userId).orderBy('createdAt', 'asc');
+                const potesSnapshot = await potesRef.get();
+                let activePotRef;
+                let activePotData;
+
+                if (potesSnapshot.empty) {
+                    console.log("Primeiro pote e planta sendo criados.");
+                    activePotRef = await db.collection('potes').add({
+                        userId: userId,
+                        createdAt: serverTimestamp,
+                        plantaCount: 1
+                    });
+                    await db.collection('planta').add({
+                        userId: userId,
+                        poteId: activePotRef.id,
+                        createdAt: serverTimestamp,
+                        porcentagemCrescimento: initialGrowth,
+                        cor: initialColor,
+                        posicao: 1,
+                        estado: growthAmount >= 0 ? 'crescendo' : 'morrendo'
+                    });
+                    return;
+                }
+
+                const lastPotDoc = potesSnapshot.docs[potesSnapshot.docs.length - 1];
+                activePotRef = lastPotDoc.ref;
+                activePotData = lastPotDoc.data();
+
+                const plantasRef = db.collection('planta')
+                    .where('userId', '==', userId)
+                    .where('poteId', '==', activePotRef.id)
+                    .orderBy('createdAt', 'desc')
+                    .limit(1);
+                const plantasSnapshot = await plantasRef.get();
+
+                if (plantasSnapshot.empty) {
+                    console.log("Pote existe mas não tem plantas. Criando planta 1.");
+                    await db.collection('planta').add({
+                        userId: userId,
+                        poteId: activePotRef.id,
+                        createdAt: serverTimestamp,
+                        porcentagemCrescimento: initialGrowth,
+                        cor: initialColor,
+                        posicao: 1,
+                        estado: growthAmount >= 0 ? 'crescendo' : 'morrendo'
+                    });
+                    await activePotRef.update({
+                        plantaCount: firebase.firestore.FieldValue.increment(1)
+                    });
+                    return;
+                }
+
+                const activePlantDoc = plantasSnapshot.docs[0];
+                const activePlantData = activePlantDoc.data();
+
+                if (activePlantData.estado === 'reproducao') {
+                    console.log("Planta em reprodução. Criando nova planta.");
+                    await activePlantDoc.ref.update({
+                        estado: 'crescendo',
+                        porcentagemCrescimento: 90,
+                        cor: getColorForHealth(90)
+                    });
+
+                    if (activePotData.plantaCount < 7) {
+                        const newPos = activePotData.plantaCount + 1;
+                        await db.collection('planta').add({
+                            userId: userId,
+                            poteId: activePotRef.id,
+                            createdAt: serverTimestamp,
+                            porcentagemCrescimento: initialGrowth,
+                            cor: initialColor,
+                            posicao: newPos,
+                            estado: growthAmount >= 0 ? 'crescendo' : 'morrendo'
+                        });
+                        await activePotRef.update({
+                            plantaCount: firebase.firestore.FieldValue.increment(1)
+                        });
+                    } else {
+                        if (potesSnapshot.size < 5) {
+                            console.log("Pote cheio. Criando novo pote.");
+                            const newPotRef = await db.collection('potes').add({
+                                userId: userId,
+                                createdAt: serverTimestamp,
+                                plantaCount: 1
+                            });
+                            await db.collection('planta').add({
+                                userId: userId,
+                                poteId: newPotRef.id,
+                                createdAt: serverTimestamp,
+                                porcentagemCrescimento: initialGrowth,
+                                cor: initialColor,
+                                posicao: 1,
+                                estado: growthAmount >= 0 ? 'crescendo' : 'morrendo'
+                            });
+                        } else {
+                            console.log("Limite de potes (5) atingido.");
+                        }
+                    }
+                } else {
+                    console.log("Planta em crescimento/morte normal.");
+                    let newGrowth = (activePlantData.porcentagemCrescimento || 0) + growthAmount;
+                    let newState = activePlantData.estado;
+
+                    if (newGrowth <= 0) {
+                        console.log("Planta morreu e será apagada.");
+                        await activePlantDoc.ref.delete();
+                        await activePotRef.update({
+                            plantaCount: firebase.firestore.FieldValue.increment(-1)
+                        });
+                    } else if (newGrowth >= 100) {
+                        await activePlantDoc.ref.update({
+                            porcentagemCrescimento: 100,
+                            estado: 'reproducao',
+                            cor: getColorForHealth(100)
+                        });
+                    } else {
+                        let corDaSaude = getColorForHealth(newGrowth);
+                        await activePlantDoc.ref.update({
+                            porcentagemCrescimento: newGrowth,
+                            estado: growthAmount < 0 ? 'morrendo' : 'crescendo',
+                            cor: corDaSaude
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Erro detalhado em handlePlantGrowth:", error);
+                throw error;
+            }
+        }
+
+        // =========================================================================
+        // LÓGICA DO CARROSSEL (ADAPTADA DO SEU EXEMPLO "my-card")
+        // =========================================================================
+        function initializeCarousel() {
+            const $cardSelector = $('.pot-card');
+            const $carousel = $('.card-carousel');
+            const $container = $('.card-carousel-container');
+            const $num = $cardSelector.length;
+
+            if ($num === 0) return; // Não faz nada se não houver potes
+            
+            $carousel.css('left', '0px');
+
+            // 1. Define o pote ativo (o último/mais recente)
+            const $activeCard = $cardSelector.eq($num - 1);
+            $activeCard.addClass('active');
+            $activeCard.prev().addClass('prev');
+            $activeCard.next().addClass('next'); // Não faz nada se for o último, o que está ok
+
+            // 2. Centraliza o carrossel no card ativo *NA INICIALIZAÇÃO*
+            try {
+                const containerWidth = $container.width();
+                const cardWidth = $activeCard.outerWidth(true);
+                const contLeft = $container.offset().left;
+                const cardLeft = $activeCard.offset().left;
+                const relativeCardLeft = cardLeft - contLeft;
+
+                let moveLeft = (containerWidth / 2) - relativeCardLeft - (cardWidth / 2);
+
+                $carousel.css('left', moveLeft + 'px');
+
+            } catch (e) {
+                console.warn("Não foi possível centralizar o carrossel na inicialização.", e);
+                $carousel.css('left', '0px');
+            }
+
+            // 3. Lógica de Clique 
+            $cardSelector.click(function () {
+                let $clicked = $(this);
+
+                if ($clicked.hasClass('active')) {
+                    return;
+                }
+                
+                let $slide = $('.pot-card.active').outerWidth(true);
+                
+                // === INÍCIO DA MODIFICAÇÃO DE RESPONSIVIDADE ===
+                // Em telas móveis, $slide pode ser calculado como 15rem,
+                // em desktops, como 18rem. O JS pega o valor de .outerWidth(true)
+                // que o CSS definir, tornando o cálculo do slide dinâmico.
+                //
+                // Fallback caso outerWidth(true) falhe
+                if (!$slide || $slide === 0) {
+                    // Verifica se estamos em modo "móvel" (pela largura do card)
+                    if ($('.pot-card').css('width') === '15rem') {
+                         $slide = 240 + 0; // 15rem * 16px + margens (assumindo 0)
+                    } else {
+                         $slide = 288 + 0; // 18rem * 16px + margens (assumindo 0)
+                    }
+                }
+                // === FIM DA MODIFICAÇÃO DE RESPONSIVIDADE ===
+
+
+                let activeIndex = $cardSelector.index($('.pot-card.active'));
+                let clickedIndex = $cardSelector.index($clicked);
+
+                if (clickedIndex > activeIndex) {
+                    let diff = clickedIndex - activeIndex;
+                    $carousel.stop(false, true).animate({ left: '-=' + ($slide * diff) }, 500, 'swing');
+                } else if (clickedIndex < activeIndex) {
+                    let diff = activeIndex - clickedIndex;
+                    $carousel.stop(false, true).animate({ left: '+=' + ($slide * diff) }, 500, 'swing');
+                }
+
+                // 4. Troca as classes
+                $cardSelector.removeClass('prev active next');
+                $clicked.addClass('active');
+                $clicked.prev().addClass('prev');
+                $clicked.next().addClass('next');
+            });
+
+            // 5. Navegação pelo teclado
+            $('html body').keydown(function (e) {
+                if (e.keyCode == 37) { // left
+                    $('.active').prev('.pot-card').trigger('click');
+                } else if (e.keyCode == 39) { // right
+                    $('.active').next('.pot-card').trigger('click');
+                }
+            });
+        }
+
+
+        // =========================================================================
+        // SCRIPT PRINCIPAL DA PÁGINA (MODAL, FORMULÁRIO, EVENTOS)
+        // =========================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Referências do DOM
+            const openModalBtn = document.getElementById('open-checkin-btn');
+            const modal = document.getElementById('checkin-modal');
+            const form = document.getElementById('checkin-form');
+            const questions = document.querySelectorAll('.question-group');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const finalMessage = document.getElementById('final-message');
+            const closeFinalMessageBtn = document.getElementById('close-final-message-btn');
+
+            let currentStep = 1;
+            const totalSteps = questions.length;
+            let userAnswers = {};
+            let currentUserId = null;
+
+            // --- Gerenciamento de Autenticação e Carga Inicial ---
+            window.fbAuth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUserId = user.uid;
+                    localStorage.setItem('mindtrackToken', currentUserId);
+                    loadAndDisplayGarden(currentUserId); // Função MODIFICADA
+                    openModalBtn.disabled = false;
+                } else {
+                    currentUserId = null;
+                    localStorage.removeItem('mindtrackToken');
+                    console.log("Usuário não logado. O jardim não será carregado.");
+                    document.querySelector('.status-message').textContent = 'Faça login para ver seu jardim';
+                    document.querySelector('.status-description').textContent = 'Seu progresso é salvo na sua conta.';
+                    openModalBtn.disabled = true;
+                    openModalBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Faça login para fazer check-in';
+                }
+            });
+
+            // --- Funções do Modal (Sem alterações) ---
+            function toggleModal(show) {
+                if (show) {
+                    modal.classList.add('active');
+                } else {
+                    modal.classList.remove('active');
+                    resetForm();
+                }
+            }
+            function resetForm() {
+                currentStep = 1;
+                form.style.display = 'block';
+                finalMessage.style.display = 'none';
+                userAnswers = {};
+                updateUI();
+            }
+            function updateUI() {
+                questions.forEach(q => q.classList.remove('active'));
+                document.querySelector(`.question-group[data-step="${currentStep}"]`).classList.add('active');
+                prevBtn.style.visibility = currentStep > 1 ? 'visible' : 'hidden';
+                nextBtn.innerHTML = currentStep === totalSteps ? 'Finalizar <i class="fa-solid fa-paper-plane"></i>' : 'Próximo <i class="fa-solid fa-arrow-right"></i>';
+                nextBtn.disabled = true;
+                const currentOptions = document.querySelectorAll(`.question-group.active .answer-option`);
+                currentOptions.forEach(opt => {
+                    if (userAnswers[currentStep] && userAnswers[currentStep] == opt.dataset.value) {
+                        opt.classList.add('selected');
+                        nextBtn.disabled = false;
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                    opt.onclick = () => {
+                        currentOptions.forEach(o => o.classList.remove('selected'));
+                        opt.classList.add('selected');
+                        nextBtn.disabled = false;
+                        userAnswers[currentStep] = parseInt(opt.dataset.value, 10);
+                    };
+                });
+            }
+
+            /**
+             * Salva o documento de check-in no Firestore. (Sem alterações)
+             */
+            async function submitCheckinData() {
+                if (!currentUserId) {
+                    alert('Erro: Usuário não autenticado. Por favor, faça login novamente.');
+                    window.location.href = './index.html';
+                    return false;
+                }
+                const humorValue = userAnswers[1];
+                const energiaValue = userAnswers[2];
+                const sonoValue = userAnswers[3];
+                const estresseValue = 6 - humorValue;
+
+                const checkinData = {
+                    userId: currentUserId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    qualidadeSono: sonoValue,
+                    nivelEstresse: estresseValue,
+                    nivelEnergia: energiaValue,
+                    humor: humorValue
+                };
+
+                try {
+                    await window.fbDb.collection('checkins').add(checkinData);
+                    console.log('Check-in salvo no Firestore:', checkinData);
+                    return checkinData;
+                } catch (error) {
+                    console.error('Erro ao salvar check-in no Firestore:', error);
+                    alert('Não foi possível registrar seu check-in. Verifique sua conexão e tente novamente.');
+                    console.error("Detalhes do erro Firestore:", error.code, error.message);
+                    return false;
+                }
+            }
+
+            // --- Event Listeners do Modal (Sem alterações) ---
+            openModalBtn.addEventListener('click', () => {
+                if (currentUserId) { toggleModal(true); } else { alert("Por favor, faça login para continuar."); }
+            });
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) { toggleModal(false); }
+            });
+            closeFinalMessageBtn.addEventListener('click', () => {
+                toggleModal(false);
+            });
+
+            // --- Lógica de Envio (MODIFICADA) ---
+            nextBtn.addEventListener('click', async () => {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    updateUI();
+                } else if (currentStep === totalSteps) {
+                    nextBtn.disabled = true;
+                    nextBtn.innerHTML = 'Enviando... <i class="fa-solid fa-spinner fa-spin"></i>';
+
+                    try {
+                        const savedData = await submitCheckinData();
+                        if (savedData) {
+                            await handlePlantGrowth(currentUserId, savedData);
+                            form.style.display = 'none';
+                            finalMessage.style.display = 'block';
+
+                            // *** ATUALIZAÇÃO IMPORTANTE ***
+                            // Recarrega o jardim (agora o carrossel de potes)
+                            loadAndDisplayGarden(currentUserId);
+                        } else {
+                            alert("Falha ao enviar. Verifique o console.");
+                            nextBtn.disabled = false;
+                            updateUI();
+                        }
+                    } catch (error) {
+                        console.error("Erro no processo de finalização do check-in:", error);
+                        alert("Ocorreu um erro ao finalizar seu check-in. Tente novamente.");
+                        nextBtn.disabled = false;
+                        updateUI();
+                    }
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateUI();
+                }
+            });
+
+            updateUI();
+        });
+    </script>
+
+    <script src="sidebar.js"></script>
+
+</body>
+
+</html>

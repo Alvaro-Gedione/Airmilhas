@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindTrack - Crie sua Conta</title>
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+
+    <script src="firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #F9FAFB;
+            --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%);
+            --primary-accent: #2EC4B6;
+            --text-dark: #374151;
+            --text-light: #F9FAFB;
+            --text-muted: #9CA3AF;
+            --border-color: #E5E7EB;
+            --font-title: 'Montserrat', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+        }
+
+        .signup-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .signup-branding {
+            flex-basis: 45%;
+            background: var(--primary-gradient);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .logo {
+            font-family: var(--font-title);
+            font-size: 36px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .signup-branding h1 {
+            font-family: var(--font-title);
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 16px;
+            max-width: 400px;
+        }
+
+        .signup-branding p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.85);
+            max-width: 400px;
+        }
+
+        .signup-form-area {
+            flex-basis: 55%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .signup-card {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .signup-card h2 {
+            font-family: var(--font-title);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .signup-card .subtitle {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: var(--font-body);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px #E0F2F1;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: var(--primary-accent);
+            color: #fff;
+            margin-top: 24px;
+        }
+
+        .btn-submit:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .login-link a {
+            color: var(--primary-accent);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .signup-branding {
+                display: none;
+            }
+
+            .signup-form-area {
+                flex-basis: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="signup-container">
+        <div class="signup-branding">
+            <div class="logo"><i class="fa-solid fa-leaf"></i><span>MindTrack</span></div>
+            <h1>Comece sua jornada para um bem-estar genuíno.</h1>
+            <p>Uma plataforma desenhada para transformar dados em ações concretas que beneficiam você e sua empresa.</p>
+        </div>
+        <div class="signup-form-area">
+            <div class="signup-card">
+                <h2>Crie sua Conta</h2>
+                <p class="subtitle">Preencha os campos para iniciar o monitoramento do seu bem-estar.</p>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="nome">Nome Completo</label>
+                        <input type="text" id="nome" placeholder="Seu nome completo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Corporativo</label>
+                        <input type="email" id="email" placeholder="seu.email@empresa.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="departamento">Departamento</label>
+                        <input type="text" id="departamento" placeholder="Ex: Financeiro, TI, RH" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Crie uma Senha</label>
+                        <input type="password" id="password" placeholder="Mínimo 8 caracteres" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Criar Conta</button>
+                </form>
+                <p class="login-link">Já tem uma conta? <a href="./index.html">Faça Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. INICIALIZAÇÃO DO FIREBASE (ASSUMINDO QUE firebase-config.js E SDKs JÁ FORAM INCLUÍDOS)
+        // =========================================================================
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // =========================================================================
+        // 2. LÓGICA DO FORMULÁRIO DE CADASTRO MODIFICADA
+        // =========================================================================
+        const signupForm = document.getElementById('signup-form');
+        const submitButton = signupForm.querySelector('.btn-submit');
+
+        signupForm.addEventListener('submit', async function (e) {
+            e.preventDefault(); // Impede o envio padrão
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Criando conta...';
+
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const departamento = document.getElementById('departamento').value;
+            // Definindo Cargo e Nivel_Acesso como padrão no frontend
+            const cargo = "Colaborador";
+            const nivelAcesso = 5; // Usando número 5 para "Colaborador" (ajuste se necessário)
+
+            try {
+                // 1. Criar o usuário no Firebase Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                if (user) {
+                    console.log("Usuário criado no Auth:", user.uid);
+
+                    // 2. Salvar dados adicionais no Firestore
+                    // Usamos o UID do Auth como ID do documento na coleção 'users'
+                    await db.collection('users').doc(user.uid).set({
+                        nome: nome,
+                        email: email, // Armazenar email aqui também pode ser útil
+                        departamento: departamento,
+                        cargo: cargo,
+                        nivelAcesso: nivelAcesso,
+                        profilePicUrl: null // Inicialmente sem foto
+                        // NÃO SALVE A SENHA AQUI! O Auth cuida disso.
+                    });
+
+                    console.log("Dados salvos no Firestore para:", user.uid);
+
+                    alert('Conta criada com sucesso! Você será redirecionado para o login.');
+                    window.location.href = './index.html'; // Redireciona para o login 
+
+                } else {
+                    throw new Error('Não foi possível obter informações do usuário após a criação.');
+                }
+
+            } catch (error) {
+                console.error('Erro ao criar conta:', error);
+                let friendlyMessage = 'Erro ao criar a conta.';
+
+                // Mapear erros comuns do Firebase Auth
+                if (error.code === 'auth/email-already-in-use') {
+                    friendlyMessage = 'Este email já está cadastrado. Tente fazer login.';
+                } else if (error.code === 'auth/invalid-email') {
+                    friendlyMessage = 'O formato do email é inválido.';
+                } else if (error.code === 'auth/weak-password') {
+                    friendlyMessage = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
+                }
+                // Adicionar tratamento para erros do Firestore se necessário (ex: falha de permissão)
+
+                alert(friendlyMessage + ` (${error.message})`);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Criar Conta'; // [cite: 316]
+            }
+        });
+    </script>
+</body>
+
+</html>
