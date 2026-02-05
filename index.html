@@ -7,20 +7,14 @@
     <title>AirMilhas - Login</title>
     <link rel="icon" href="./img/Airmilhas_Logo.png">
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
         :root {
-            /* Paleta AirMilhas baseada na Logo */
             --air-dark-blue: #0a192f;
             --air-medium-blue: #112240;
             --air-accent-blue: #233554;
@@ -28,16 +22,11 @@
             --air-slate: #8892b0;
             --air-white: #ffffff;
             --air-gradient: linear-gradient(180deg, #0a192f 0%, #112240 100%);
-
             --font-title: 'Montserrat', sans-serif;
             --font-body: 'Inter', sans-serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: var(--font-body);
@@ -48,13 +37,8 @@
             display: flex;
         }
 
-        .login-container {
-            display: flex;
-            width: 100%;
-            height: 100%;
-        }
+        .login-container { display: flex; width: 100%; height: 100%; }
 
-        /* Lado Esquerdo: Branding */
         .login-branding {
             flex-basis: 45%;
             background: var(--air-gradient);
@@ -69,14 +53,10 @@
             position: relative;
         }
 
-        /* Elemento decorativo sutil (referência a aviação) */
         .login-branding::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: url('https://www.transparenttextures.com/patterns/cubes.png');
             opacity: 0.05;
         }
@@ -114,21 +94,16 @@
             z-index: 1;
         }
 
-        /* Lado Direito: Formulário */
         .login-form-area {
             flex-basis: 55%;
             background-color: #0f172a;
-            /* Tom levemente diferente para contraste */
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 40px;
         }
 
-        .login-card {
-            width: 100%;
-            max-width: 400px;
-        }
+        .login-card { width: 100%; max-width: 400px; }
 
         .login-card h2 {
             font-family: var(--font-title);
@@ -144,9 +119,7 @@
             margin-bottom: 40px;
         }
 
-        .form-group {
-            margin-bottom: 24px;
-        }
+        .form-group { margin-bottom: 24px; }
 
         .form-group label {
             display: block;
@@ -173,33 +146,6 @@
             box-shadow: 0 0 0 3px rgba(204, 214, 246, 0.1);
         }
 
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .form-options .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: var(--air-slate);
-        }
-
-        .form-options a,
-        .signup-link a {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--air-silver);
-            text-decoration: none;
-        }
-
-        .form-options a:hover {
-            text-decoration: underline;
-        }
-
         .btn-submit {
             width: 100%;
             padding: 16px;
@@ -220,12 +166,6 @@
             transform: translateY(-2px);
         }
 
-        .btn-submit:disabled {
-            background-color: var(--air-accent-blue);
-            color: var(--air-slate);
-            cursor: not-allowed;
-        }
-
         .signup-link {
             text-align: center;
             margin-top: 32px;
@@ -233,14 +173,11 @@
             color: var(--air-slate);
         }
 
-        @media (max-width: 768px) {
-            .login-branding {
-                display: none;
-            }
+        .signup-link a { color: var(--air-silver); text-decoration: none; font-weight: 600; }
 
-            .login-form-area {
-                flex-basis: 100%;
-            }
+        @media (max-width: 768px) {
+            .login-branding { display: none; }
+            .login-form-area { flex-basis: 100%; }
         }
     </style>
 </head>
@@ -249,12 +186,12 @@
     <div class="login-container">
         <div class="login-branding">
             <div class="logo">
-                <img src="./img/Airmilhas_Logo.png" alt="AirMilhas Logo">
+                <img src="./img/Airmilhas_Logo.png" alt="AirMilhas" onerror="this.style.display='none'; document.getElementById('alt-icon').style.display='block'">
+                <i id="alt-icon" class="fa-solid fa-paper-plane" style="display:none; margin-right: 10px;"></i>
                 <span>AirMilhas</span>
             </div>
             <h1>Gestão Inteligente de Milhas e Viagens.</h1>
-            <p>Acesse o ecossistema AirMilhas para gerenciar emissões, mentorias e resultados financeiros em um só
-                lugar.</p>
+            <p>Acesse o ecossistema AirMilhas para gerenciar emissões, mentorias e resultados financeiros em um só lugar.</p>
         </div>
 
         <div class="login-form-area">
@@ -265,20 +202,12 @@
                 <form id="login-form">
                     <div class="form-group">
                         <label for="email">E-mail Corporativo</label>
-                        <input type="email" id="email" placeholder="nome@airmilhas.com" required>
+                        <input type="email" id="email" placeholder="admin@airmilhas.com" required>
                     </div>
 
                     <div class="form-group">
                         <label for="password">Senha</label>
-                        <input type="password" id="password" placeholder="••••••••" required>
-                    </div>
-
-                    <div class="form-options">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="remember-me">
-                            <label for="remember-me">Manter conectado</label>
-                        </div>
-                        <a href="#">Recuperar senha</a>
+                        <input type="password" id="password" placeholder="senha123" required>
                     </div>
 
                     <button type="submit" class="btn-submit">Entrar no Painel</button>
@@ -292,14 +221,14 @@
     </div>
 
     <script>
-        // Simulação de credenciais para o protótipo
+        // CONFIGURAÇÃO 100% LOCAL PARA PROTÓTIPO
         const MOCK_ADMIN = {
             email: "admin@airmilhas.com",
             password: "senha123",
             data: {
                 nome: "Administrador AirMilhas",
                 cargo: "Diretor de Operações",
-                nivelAcesso: 1, // Nível alto para ver tudo
+                nivelAcesso: 1,
                 profilePicUrl: null,
                 departamento: "Diretoria"
             }
@@ -308,7 +237,7 @@
         const loginForm = document.getElementById('login-form');
         const submitButton = loginForm.querySelector('.btn-submit');
 
-        loginForm.addEventListener('submit', async (e) => {
+        loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
             submitButton.disabled = true;
@@ -317,65 +246,27 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // --- LÓGICA DE SIMULAÇÃO PARA O PROTÓTIPO ---
-            if (email === MOCK_ADMIN.email && password === MOCK_ADMIN.password) {
-                // Simula um pequeno delay de rede para parecer real
-                setTimeout(() => {
+            // Simulação de login
+            setTimeout(() => {
+                if (email === MOCK_ADMIN.email && password === MOCK_ADMIN.password) {
                     const fullUserData = {
                         uid: "simulated-admin-id",
                         email: MOCK_ADMIN.email,
                         ...MOCK_ADMIN.data
                     };
 
-                    // Salva no localStorage para que a sidebar.js consiga ler
-                    localStorage.setItem('airmilhasToken', fullUserData.uid);
-                    localStorage.setItem('airmilhasUser', JSON.stringify(fullUserData));
+                    // Salva no localStorage com nomes consistentes para a sidebar.js
+                    localStorage.setItem('mindtrackToken', fullUserData.uid);
+                    localStorage.setItem('mindtrackUser', JSON.stringify(fullUserData));
 
-                    alert('Login de simulação realizado com sucesso!');
                     window.location.href = './Gerente.html';
-                }, 1000);
-                return;
-            }
-            // --- FIM DA SIMULAÇÃO ---
-
-            // Lógica real do Firebase (caso você queira manter para o futuro)
-            try {
-                // Se não for o admin fake, tenta o Firebase
-                if (typeof firebase !== 'undefined') {
-                    const auth = firebase.auth();
-                    const db = firebase.firestore();
-
-                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                    const user = userCredential.user;
-
-                    if (user) {
-                        const userDoc = await db.collection('users').doc(user.uid).get();
-                        if (userDoc.exists) {
-                            const userData = userDoc.data();
-                            const fullUserData = {
-                                uid: user.uid,
-                                email: user.email,
-                                nome: userData.nome,
-                                cargo: userData.cargo,
-                                nivelAcesso: userData.nivelAcesso,
-                                profilePicUrl: userData.profilePicUrl
-                            };
-                            localStorage.setItem('airmilhasToken', user.uid);
-                            localStorage.setItem('airmilhasUser', JSON.stringify(fullUserData));
-                            window.location.href = './Gerente.html';
-                        }
-                    }
                 } else {
-                    throw new Error('Credenciais inválidas.');
+                    alert('Credenciais incorretas para o protótipo.\nUse: admin@airmilhas.com / senha123');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Entrar no Painel';
                 }
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Falha na autenticação: E-mail ou senha incorretos.');
-                submitButton.disabled = false;
-                submitButton.textContent = 'Entrar no Painel';
-            }
+            }, 800);
         });
     </script>
 </body>
-
 </html>
