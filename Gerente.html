@@ -1,451 +1,299 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindTrack - Painel de Bem-Estar</title> <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+    <title>AirMilhas - Painel Geral</title>
+    <link rel="icon" href="./img/Airmilhas_Logo.png">
 
     <script src="firebase-config.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        /* Cole todo o seu bloco <style> existente aqui, sem modificações */
-        /* --- 1. CONFIGURAÇÕES GLOBAIS E NOVA PALETA DE CORES --- */
         :root {
-            --bg-main: #F9FAFB; /* */
-            --bg-widget: #FFFFFF; /* */
-            --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%); /* */
-            --primary-accent: #2EC4B6; /* */
-            --secondary-accent: #8E7AB5; /* */
-            --text-dark: #374151; /* */
-            --text-light: #F9FAFB; /* */
-            --text-muted: #9CA3AF; /* */
-            --border-color: #E5E7EB; /* */
-            --color-positive: #34D399; /* */
-            --color-neutral: #FBBF24; /* */
-            --color-negative: #FB923C; /* */
-            --font-title: 'Montserrat', sans-serif; /* */
-            --font-body: 'Inter', sans-serif; /* */
-            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); /* */
-            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07); /* */
+            --air-dark-blue: #0a192f;
+            --air-medium-blue: #112240;
+            --air-accent-blue: #233554;
+            --air-silver: #ccd6f6;
+            --air-slate: #8892b0;
+            --air-white: #ffffff;
+            --color-positive: #4ade80;
+            --color-warning: #fbbf24;
+            --color-danger: #f87171;
+            --font-title: 'Montserrat', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        /* --- ANIMAÇÕES --- */
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } /* */
-        @keyframes drawPath { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } } /* */
-        @keyframes fillDonut { from { stroke-dashoffset: 565; } to { stroke-dashoffset: calc(565 - (565 * var(--donut-percentage, 0))); } } /* Variável CSS para preenchimento */
-        @keyframes countUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } /* */
-        /* --- GERAL --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; } /* */
-        body { font-family: var(--font-body); background-color: var(--bg-main); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; } /* */
-        /* --- LAYOUT --- */
-        /* .sidebar { ... } */ /* Injetado */
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; } /* */
-        /* --- HEADER --- */
-        .page-header { margin-bottom: 32px; } /* */
-        .page-header h1 { font-family: var(--font-title); font-size: 32px; font-weight: 700; margin-bottom: 8px; } /* */
-        .page-header p { font-size: 16px; color: var(--text-muted); } /* */
-        /* --- WIDGET BASE --- */
-        .widget { background-color: var(--bg-widget); padding: 28px; border-radius: 20px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; opacity: 0; animation: fadeInUp 0.5s ease-out forwards; } /* */
-        .widget:hover { transform: translateY(-6px); box-shadow: var(--shadow-medium); } /* */
-        .widget-title { font-family: var(--font-title); font-size: 20px; margin-bottom: 24px; } /* */
-        /* --- GRID --- */
-        .dashboard-grid { display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); } /* Ajustado para auto-fit */
-        /* Animação em cascata */
-        .dashboard-grid > .widget:nth-child(1) { animation-delay: 0.1s; } /* */
-        .dashboard-grid > .widget:nth-child(2) { animation-delay: 0.2s; } /* */
-        .dashboard-grid > .widget:nth-child(3) { animation-delay: 0.3s; } /* */
-        .dashboard-grid > .widget:nth-child(4) { animation-delay: 0.4s; } /* */
-        .dashboard-grid > .widget:nth-child(5) { animation-delay: 0.5s; } /* */
-        .dashboard-grid > .widget:nth-child(6) { animation-delay: 0.6s; } /* */
-        .dashboard-grid > .widget:nth-child(7) { animation-delay: 0.7s; } /* */
-        .dashboard-grid > .widget:nth-child(8) { animation-delay: 0.8s; } /* */
-        /* --- KPIs --- */
-        .kpi-card { grid-column: span 1; } /* */
-        .kpi-value { font-family: var(--font-title); font-size: 40px; font-weight: 700; animation: countUp 0.6s ease-out; display: inline-block; /* Evita quebra linha com small */ } /* */
-        .kpi-value small { font-size: 0.5em; color: var(--text-muted); } /* */
-        .kpi-label { color: var(--text-muted); margin-bottom: 12px; font-weight: 500; display: block; } /* */
-        .kpi-trend { font-size: 14px; font-weight: 600; margin-top: 12px; } /* */
-        .kpi-trend.positive { color: var(--color-positive); } /* */
-        .kpi-trend.negative { color: var(--color-negative); } /* */
-        .kpi-trend.neutral { color: var(--text-muted); } /* */
-        /* --- GRÁFICOS --- */
-        .line-chart-widget { grid-column: 1 / -1; height: 380px; } /* Ocupa linha inteira */
-         @media (min-width: 1024px) { .line-chart-widget { grid-column: span 3; } } /* Volta a 3 colunas em telas maiores */
-        .line-chart-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: drawPath 2s ease-out forwards; } /* */
-        .line-chart-path.delay-1 { animation-delay: 0.5s; } /* */
-        .line-chart-path.delay-2 { animation-delay: 0.8s; } /* */
-        .donut-chart-widget { grid-column: span 1; height: 380px; display: flex; flex-direction: column; align-items: center; } /* */
-        .donut-svg-wrapper { position: relative; margin-top: 20px; } /* */
-        .donut-svg { width: 200px; height: 200px; transform: rotate(-90deg); } /* */
-        .donut-bg, .donut-fg { fill: none; stroke-width: 25; } /* */
-        .donut-bg { stroke: var(--border-color); } /* */
-        .donut-fg { stroke: var(--color-positive); stroke-linecap: round; stroke-dasharray: 565; stroke-dashoffset: 565; animation: fillDonut 1.5s ease-out forwards 1s; } /* */
-        .donut-center-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-family: var(--font-title); } /* */
-        .donut-value { font-size: 36px; font-weight: 700; } /* */
-        .donut-label { font-size: 14px; color: var(--text-muted); } /* */
-        /* --- HEATMAP --- */
-        .heatmap-widget { grid-column: 1 / -1; } /* Ocupa linha inteira */
-         @media (min-width: 768px) { .heatmap-widget { grid-column: span 2; } } /* Ocupa 2 colunas em telas médias+ */
-        .heatmap-table { width: 100%; border-collapse: collapse; text-align: center; margin-top: 10px; } /* */
-        .heatmap-table th, .heatmap-table td { padding: 14px; } /* */
-        .heatmap-table th { font-weight: 600; color: var(--text-muted); font-size: 12px; text-transform: uppercase; } /* */
-        .heatmap-table td { font-weight: 500; }
-        .heatmap-table td.dept-name { text-align: left; font-weight: 600; } /* Nome do depto à esquerda */
-        .heatmap-table td span { display: inline-block; border-radius: 8px; padding: 6px 12px; font-weight: 600; transition: all 0.3s ease; font-size: 14px; } /* Células coloridas */
-        .heat-low { background-color: #ECFDF5; color: #059669; } /* Verde escuro */
-        .heat-medium { background-color: #FFFBEB; color: #D97706; } /* Ambar escuro */
-        .heat-high { background-color: #FFF1F2; color: #E11D48; } /* Rosa escuro/vermelho */
-        .heat-nodata { background-color: #F3F4F6; color: var(--text-muted); font-style: italic; font-size: 12px; padding: 8px; } /* Para "Sem dados" */
-        /* --- ALERTAS --- */
-        .alerts-widget { grid-column: 1 / -1; } /* Ocupa linha inteira */
-         @media (min-width: 768px) { .alerts-widget { grid-column: span 2; } } /* Ocupa 2 colunas */
-        .alerts-list { list-style: none; margin-top: 10px; max-height: 250px; overflow-y: auto; padding-right: 10px;} /* Altura máxima e scroll */
-        .alerts-list li { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); } /* */
-        .alerts-list li:last-child { border-bottom: none; } /* */
-        .alert-icon { margin-right: 16px; font-size: 18px; width: 20px; text-align: center; flex-shrink: 0; } /* */
-        .alert-icon.negative { color: var(--color-negative); } /* */
-        .alert-icon.positive { color: var(--color-positive); } /* */
-        .alert-icon.neutral { color: var(--color-neutral); } /* Novo */
-        .alert-text { flex-grow: 1; font-size: 14px; line-height: 1.5; } /* */
-        .alert-time { font-size: 12px; color: var(--text-muted); white-space: nowrap; margin-left: 16px; flex-shrink: 0; } /* */
-        /* --- Mensagem de Loading/Erro --- */
-        .loading-message, .error-message { text-align: center; padding: 40px; color: var(--text-muted); font-style: italic; grid-column: 1 / -1; }
-        .error-message { color: var(--color-danger); }
+
+        /* Animações */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--air-dark-blue);
+            color: var(--air-silver);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background-color: #0f172a;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header h1 {
+            font-family: var(--font-title);
+            font-size: 28px;
+            color: var(--air-white);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        .widget {
+            background-color: var(--air-medium-blue);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--air-accent-blue);
+            animation: fadeInUp 0.5s ease-out forwards;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .widget-title {
+            font-family: var(--font-title);
+            font-size: 16px;
+            color: var(--air-slate);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--air-white);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .kpi-trend {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            color: var(--color-positive);
+        }
+
+        .trend-down {
+            color: var(--color-danger);
+        }
+
+        /* Gráfico de Linha Simulado */
+        .chart-large {
+            grid-column: 1 / -1;
+            height: 350px;
+        }
+
+        @media (min-width: 1024px) {
+            .chart-large {
+                grid-column: span 2;
+            }
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 250px;
+            border-left: 2px solid var(--air-accent-blue);
+            border-bottom: 2px solid var(--air-accent-blue);
+            position: relative;
+            margin-top: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+        }
+
+        .bar {
+            width: 30px;
+            background: linear-gradient(to top, var(--air-accent-blue), var(--air-silver));
+            border-radius: 4px 4px 0 0;
+            transition: 0.5s;
+        }
+
+        /* Tabela de Serviços */
+        .services-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .services-table th {
+            text-align: left;
+            padding: 12px;
+            color: var(--air-slate);
+            font-size: 12px;
+        }
+
+        .services-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--air-accent-blue);
+            font-size: 14px;
+            color: var(--air-white);
+        }
+
+        .status-pill {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status-done {
+            background: rgba(74, 222, 128, 0.1);
+            color: var(--color-positive);
+        }
     </style>
 </head>
+
 <body>
     <div id="sidebar-placeholder"></div>
 
     <main class="main-content">
         <header class="page-header">
-            <h1>Painel de Bem-Estar</h1>
-            <p>Visão geral da saúde mental da equipe nos últimos 30 dias.</p> </header>
+            <div>
+                <h1>Painel Geral</h1>
+                <p style="color: var(--air-slate)">Bem-vindo ao centro de comando AirMilhas.</p>
+            </div>
+            <div class="date-filter">
+                <span
+                    style="font-size: 14px; background: var(--air-medium-blue); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--air-accent-blue);">
+                    Fev 2026 <i class="fa-solid fa-calendar-days" style="margin-left: 10px;"></i>
+                </span>
+            </div>
+        </header>
 
-        <div class="dashboard-grid" id="dashboard-container">
-             <div class="loading-message">
-                 <i class="fa-solid fa-spinner fa-spin"></i> Carregando dados do painel...
-             </div>
+        <div class="dashboard-grid">
+            <div class="widget">
+                <span class="widget-title">Faturamento Bruto</span>
+                <span class="kpi-value">R$ 142.500</span>
+                <span class="kpi-trend trend-up"><i class="fa-solid fa-arrow-up"></i> 12.5%</span>
+            </div>
+            <div class="widget">
+                <span class="widget-title">Lucro Líquido</span>
+                <span class="kpi-value">R$ 38.420</span>
+                <span class="kpi-trend trend-up"><i class="fa-solid fa-arrow-up"></i> 8.2%</span>
+            </div>
+            <div class="widget">
+                <span class="widget-title">Economia (RAV)</span>
+                <span class="kpi-value">R$ 65.180</span>
+                <span class="kpi-trend"><i class="fa-solid fa-plane"></i> Valor ao Cliente</span>
+            </div>
+            <div class="widget">
+                <span class="widget-title">Satisfação (NPS)</span>
+                <span class="kpi-value">9.4</span>
+                <span class="kpi-trend trend-up"><i class="fa-solid fa-face-smile"></i> Zona de Excelência</span>
+            </div>
+
+            <div class="widget chart-large">
+                <span class="widget-title">Desempenho Semanal (Vendas)</span>
+                <div class="chart-placeholder">
+                    <div class="bar" style="height: 40%;"></div>
+                    <div class="bar" style="height: 65%;"></div>
+                    <div class="bar" style="height: 50%;"></div>
+                    <div class="bar" style="height: 85%;"></div>
+                    <div class="bar" style="height: 70%;"></div>
+                    <div class="bar" style="height: 95%;"></div>
+                </div>
+            </div>
+
+            <div class="widget" style="grid-column: 1 / -1;">
+                <span class="widget-title">Fluxo de Onboarding Recente</span>
+                <table class="services-table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Serviço</th>
+                            <th>Status do Contrato</th>
+                            <th>Próximo Passo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>João Silva</td>
+                            <td>Mentoria Platinum</td>
+                            <td><span class="status-pill status-done">ASSINADO</span></td>
+                            <td>Reunião de Welcome</td>
+                        </tr>
+                        <tr>
+                            <td>Maria Oliveira</td>
+                            <td>Emissão Internacional</td>
+                            <td><span class="status-pill"
+                                    style="background: rgba(251, 191, 36, 0.1); color: var(--color-warning);">PENDENTE</span>
+                            </td>
+                            <td>Cobrar Autentique</td>
+                        </tr>
+                        <tr>
+                            <td>Empresa XPTO</td>
+                            <td>Gestão de Frota</td>
+                            <td><span class="status-pill status-done">ASSINADO</span></td>
+                            <td>Criação Grupo Zap</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
-    <script>
-        // Bloco de inicialização padrão
-        if (typeof firebaseConfig !== 'undefined') {
-            try {
-                firebase.initializeApp(firebaseConfig);
-                window.fbAuth = firebase.auth();
-                window.fbDb = firebase.firestore();
-                console.log("Firebase inicializado com sucesso em Gerente.html.");
-            } catch (e) {
-                console.error("Erro ao inicializar Firebase:", e);
-                if (e.code !== 'app/duplicate-app') { alert("Erro ao conectar com os serviços."); }
-            }
-        } else {
-            console.error("firebaseConfig não definido!"); alert("Erro crítico de configuração.");
-        }
-    </script>
-
     <script src="sidebar.js"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const dashboardContainer = document.getElementById('dashboard-container');
-            const requiredAccessLevel = 3; // Nível Gerente ou menor (0, 1, 2, 3)
-
-            // --- Validação Inicial ---
-            if (!window.fbAuth || !window.fbDb) {
-                dashboardContainer.innerHTML = '<p class="error-message">Erro: Serviços Firebase não inicializados.</p>';
-                return;
+        // Simulação de proteção de rota
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('mindtrackUser'));
+            if (!user) {
+                window.location.href = './index.html';
             }
-
-            const auth = window.fbAuth;
-            const db = window.fbDb;
-
-            // --- Função para buscar e validar usuário ---
-            async function getUserAndValidateAccess() {
-                const userId = localStorage.getItem('mindtrackToken');
-                if (!userId) {
-                     console.error("Usuário não logado (localStorage).");
-                     return null;
-                }
-
-                // Tenta pegar do Auth state (pode ainda não estar pronto)
-                if (!auth.currentUser || auth.currentUser.uid !== userId) {
-                    console.warn("Auth state não pronto ou ID diferente do localStorage. Buscando dados do Firestore...");
-                }
-
-                try {
-                    const userDocRef = db.collection('users').doc(userId);
-                    const docSnap = await userDocRef.get();
-                    if (docSnap.exists) {
-                        const userData = docSnap.data();
-                        if (userData.nivelAcesso !== undefined && userData.nivelAcesso <= requiredAccessLevel) {
-                            console.log("Acesso permitido. Nível:", userData.nivelAcesso);
-                            return userData; // Retorna dados do usuário se o acesso for permitido
-                        } else {
-                            console.error("Acesso negado. Nível do usuário:", userData.nivelAcesso);
-                            return null;
-                        }
-                    } else {
-                        console.error("Documento do usuário não encontrado no Firestore.");
-                        return null;
-                    }
-                } catch (error) {
-                    console.error("Erro ao buscar dados do usuário:", error);
-                    return null;
-                }
-            }
-
-            // --- Função Principal para Carregar Dados ---
-            async function loadDashboardData() {
-                const managerUser = await getUserAndValidateAccess();
-                if (!managerUser) {
-                    dashboardContainer.innerHTML = '<p class="error-message">Acesso negado ou erro ao verificar permissões.</p>';
-                    // Opcional: redirecionar para login ou página inicial
-                    // setTimeout(() => { window.location.href = './index.html'; }, 3000);
-                    return;
-                }
-
-                // Define o período (últimos 30 dias)
-                const endDate = new Date();
-                const startDate = new Date();
-                startDate.setDate(endDate.getDate() - 30);
-                const startTimestamp = firebase.firestore.Timestamp.fromDate(startDate);
-                const endTimestamp = firebase.firestore.Timestamp.fromDate(endDate);
-
-                try {
-                    console.log("Buscando checkins entre", startDate.toLocaleDateString(), "e", endDate.toLocaleDateString());
-                    // Busca checkins no período
-                    const checkinsSnapshot = await db.collection('checkins')
-                        .where('timestamp', '>=', startTimestamp)
-                        .where('timestamp', '<=', endTimestamp)
-                        // .orderBy('timestamp', 'desc') // Ordena se precisar dos mais recentes para alertas
-                        .get();
-
-                    if (checkinsSnapshot.empty) {
-                        dashboardContainer.innerHTML = '<p class="loading-message">Nenhum check-in encontrado nos últimos 30 dias.</p>';
-                        return;
-                    }
-
-                    // Busca todos os usuários para mapear departamentos (cuidado com performance/custo em larga escala!)
-                    // Idealmente, filtrar pelos userIds presentes nos checkins, mas faremos simples por enquanto
-                    const usersSnapshot = await db.collection('users').get();
-                    const usersMap = new Map(); // Mapa de userId -> { nome, departamento }
-                    usersSnapshot.forEach(doc => {
-                        const data = doc.data();
-                        usersMap.set(doc.id, { nome: data.nome || 'N/A', departamento: data.departamento || 'N/A' });
-                    });
-
-                    // --- Processamento dos Dados ---
-                    const checkinsData = [];
-                    const userCheckinCounts = new Map(); // Conta checkins por usuário
-                    let totalStress = 0, totalEnergy = 0, totalMood = 0, totalSleep = 0;
-                    const departmentData = {}; // { DeptName: { count: 0, stressSum: 0, energySum: 0, moodSum: 0 } }
-                    const uniqueUserIds = new Set(); // Para taxa de adesão
-
-                    checkinsSnapshot.forEach(doc => {
-                        const checkin = doc.data();
-                        checkinsData.push(checkin); // Guarda todos para gráficos de linha (se implementar)
-                        uniqueUserIds.add(checkin.userId);
-
-                        // Contagem por usuário
-                        userCheckinCounts.set(checkin.userId, (userCheckinCounts.get(checkin.userId) || 0) + 1);
-
-                        // Somas totais
-                        totalStress += checkin.nivelEstresse || 0;
-                        totalEnergy += checkin.nivelEnergia || 0;
-                        totalMood += checkin.humor || 0; // Usando 'humor'
-                        totalSleep += checkin.qualidadeSono || 0;
-
-                        // Agregação por departamento
-                        const userDept = usersMap.get(checkin.userId)?.departamento || 'Sem Depto';
-                        if (!departmentData[userDept]) {
-                            departmentData[userDept] = { count: 0, stressSum: 0, energySum: 0, moodSum: 0 };
-                        }
-                        departmentData[userDept].count++;
-                        departmentData[userDept].stressSum += checkin.nivelEstresse || 0;
-                        departmentData[userDept].energySum += checkin.nivelEnergia || 0;
-                        departmentData[userDept].moodSum += checkin.humor || 0;
-                    });
-
-                    const totalCheckins = checkinsData.length;
-                    const totalUsersWhoCheckedIn = uniqueUserIds.size;
-                    const totalUsersInSystem = usersMap.size; // Total de usuários cadastrados
-
-                    // --- Cálculos ---
-                    // Média Geral (escala 1-5 para humor, energia, sono; stress é invertido 1-5)
-                    const avgMood = totalCheckins > 0 ? (totalMood / totalCheckins) : 0;
-                    const avgEnergy = totalCheckins > 0 ? (totalEnergy / totalCheckins) : 0;
-                    const avgSleep = totalCheckins > 0 ? (totalSleep / totalCheckins) : 0;
-                    const avgStress = totalCheckins > 0 ? (totalStress / totalCheckins) : 0; // Stress 1=baixo, 5=alto
-
-                    // Índice de Bem-Estar Simples (Média das métricas positivas - stress invertido) / Convertido para escala /10
-                    // Humor(1-5), Energia(1-5), Sono(1-5), (6-Stress)(1-5) -> Média -> x2 para escala /10
-                    const wellBeingIndex = totalCheckins > 0 ?
-                         (((avgMood + avgEnergy + avgSleep + (6 - avgStress)) / 4) * 2)
-                         : 0;
-
-                    // Taxa de Adesão (Simplificada: % de usuários cadastrados que fizeram check-in no período)
-                    const adherenceRate = totalUsersInSystem > 0 ? (totalUsersWhoCheckedIn / totalUsersInSystem) * 100 : 0;
-
-                    // Média de Estresse (Texto)
-                    let stressLevelText = "Baixo";
-                    if (avgStress > 2.5) stressLevelText = "Médio";
-                    if (avgStress > 3.8) stressLevelText = "Alto";
-
-                    // Alertas Ativos (Simulado - pegar os 3 checkins com maior estresse)
-                    const sortedByStress = [...checkinsData].sort((a, b) => (b.nivelEstresse || 0) - (a.nivelEstresse || 0));
-                    const topAlerts = sortedByStress.slice(0, 3); // Pega os 3 piores
-
-                    // Cálculo das médias departamentais para Heatmap
-                    const departmentAverages = {};
-                    for (const deptName in departmentData) {
-                        const dept = departmentData[deptName];
-                        departmentAverages[deptName] = {
-                            stress: dept.count > 0 ? dept.stressSum / dept.count : 0,
-                            energy: dept.count > 0 ? dept.energySum / dept.count : 0,
-                            mood: dept.count > 0 ? dept.moodSum / dept.count : 0,
-                        };
-                    }
-
-                     // Humor Geral (Donut) - % de checkins com humor >= 4
-                     const positiveMoodCount = checkinsData.filter(c => (c.humor || 0) >= 4).length;
-                     const positiveMoodPercentage = totalCheckins > 0 ? (positiveMoodCount / totalCheckins) : 0; // Valor entre 0 e 1
-
-                    // --- Geração do HTML ---
-                    dashboardContainer.innerHTML = `
-                        <div class="widget kpi-card">
-                            <span class="kpi-label">Índice de Bem-Estar</span>
-                            <span class="kpi-value">${wellBeingIndex.toFixed(1)}<small>/10</small></span>
-                            <div class="kpi-trend neutral"><i class="fa-solid fa-minus"></i> --</div> </div>
-                        <div class="widget kpi-card">
-                            <span class="kpi-label">Taxa de Adesão</span>
-                            <span class="kpi-value">${adherenceRate.toFixed(0)}<small>%</small></span>
-                            <div class="kpi-trend neutral"><i class="fa-solid fa-minus"></i> --</div> </div>
-                        <div class="widget kpi-card">
-                            <span class="kpi-label">Média de Estresse</span>
-                            <span class="kpi-value" style="font-size: 32px;">${stressLevelText}</span> <div class="kpi-trend ${avgStress > 3 ? 'negative' : (avgStress < 2 ? 'positive' : 'neutral')}">(${avgStress.toFixed(1)}/5)</div>
-                        </div>
-                        <div class="widget kpi-card">
-                            <span class="kpi-label">Alertas Ativos</span>
-                            <span class="kpi-value">${topAlerts.length}</span> <div class="kpi-trend ${topAlerts.length > 0 ? 'negative' : 'positive'}">${topAlerts.length > 0 ? 'Requerem atenção' : 'Tudo OK'}</div>
-                        </div>
-
-                        <div class="widget line-chart-widget">
-                            <h2 class="widget-title">Evolução (Visualização Estática)</h2>
-                            <svg width="100%" height="280" style="overflow: visible;">
-                                <line x1="40" y1="250" x2="98%" y2="250" stroke="#E5E7EB" stroke-width="2"/>
-                                <line x1="40" y1="250" x2="40" y2="20" stroke="#E5E7EB" stroke-width="2"/>
-                                <text x="20" y="105" font-size="10" fill="var(--color-positive)">Bem-Estar</text>
-                                <path class="line-chart-path" d="M 40 100 Q 150 50, 250 110 T 450 90 T 650 60" stroke="var(--color-positive)" fill="none" stroke-width="4" stroke-linecap="round"/>
-                                <text x="20" y="155" font-size="10" fill="var(--primary-accent)">Humor</text>
-                                <path class="line-chart-path delay-1" d="M 40 150 Q 150 120, 250 160 T 450 140 T 650 110" stroke="var(--primary-accent)" fill="none" stroke-width="4" stroke-linecap="round"/>
-                                <text x="20" y="185" font-size="10" fill="var(--color-negative)">Stress</text>
-                                <path class="line-chart-path delay-2" d="M 40 180 Q 150 200, 250 170 T 450 190 T 650 210" stroke="var(--color-negative)" fill="none" stroke-width="4" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-
-                        <div class="widget donut-chart-widget">
-                            <h2 class="widget-title">Humor Geral</h2>
-                            <div class="donut-svg-wrapper">
-                                <svg class="donut-svg" viewBox="0 0 200 200" style="--donut-percentage: ${positiveMoodPercentage.toFixed(2)};"> <circle class="donut-bg" r="90" cx="100" cy="100" />
-                                    <circle class="donut-fg" r="90" cx="100" cy="100" />
-                                </svg>
-                                <div class="donut-center-text">
-                                    <div class="donut-value">${(positiveMoodPercentage * 100).toFixed(0)}%</div>
-                                    <div class="donut-label">Positivo</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="widget heatmap-widget">
-                            <h2 class="widget-title">Pontos de Atenção por Departamento</h2>
-                            <table class="heatmap-table">
-                                <thead>
-                                    <tr><th>Departamento</th><th>Estresse</th><th>Energia</th><th>Humor</th></tr>
-                                </thead>
-                                <tbody id="heatmap-body">
-                                    </tbody>
-                            </table>
-                        </div>
-
-                        <div class="widget alerts-widget">
-                            <h2 class="widget-title">Últimos Alertas (Maior Estresse)</h2>
-                            <ul class="alerts-list" id="alerts-list-container">
-                                </ul>
-                        </div>
-                    `;
-
-                    // --- Preenche Heatmap ---
-                    const heatmapBody = document.getElementById('heatmap-body');
-                    const sortedDeptNames = Object.keys(departmentAverages).sort(); // Ordena alfabeticamente
-
-                    if (sortedDeptNames.length === 0) {
-                         heatmapBody.innerHTML = '<tr><td colspan="4" class="heat-nodata">Sem dados departamentais.</td></tr>';
-                    } else {
-                        sortedDeptNames.forEach(deptName => {
-                            const avg = departmentAverages[deptName];
-                            const stressClass = avg.stress > 3.8 ? 'heat-high' : (avg.stress > 2.5 ? 'heat-medium' : 'heat-low');
-                            const energyClass = avg.energy < 2.5 ? 'heat-high' : (avg.energy < 3.8 ? 'heat-medium' : 'heat-low'); // Energia baixa é ruim
-                            const moodClass = avg.mood < 2.5 ? 'heat-high' : (avg.mood < 3.8 ? 'heat-medium' : 'heat-low');       // Humor baixo é ruim
-
-                            const row = heatmapBody.insertRow();
-                            row.innerHTML = `
-                                <td class="dept-name">${deptName}</td>
-                                <td><span class="${stressClass}">${avg.stress.toFixed(1)}</span></td>
-                                <td><span class="${energyClass}">${avg.energy.toFixed(1)}</span></td>
-                                <td><span class="${moodClass}">${avg.mood.toFixed(1)}</span></td>
-                            `;
-                        });
-                    }
-
-
-                    // --- Preenche Alertas ---
-                    const alertsListContainer = document.getElementById('alerts-list-container');
-                    if (topAlerts.length === 0) {
-                        alertsListContainer.innerHTML = '<li><i class="fa-solid fa-check-circle alert-icon positive"></i><span class="alert-text">Nenhum alerta significativo encontrado.</span></li>';
-                    } else {
-                        topAlerts.forEach(alert => {
-                            const user = usersMap.get(alert.userId);
-                            const deptText = user ? `em <strong>${user.departamento || 'N/A'}</strong>` : '';
-                            const alertDate = alert.timestamp.toDate(); // Converte Timestamp para Date
-                            const timeDiff = endDate.getTime() - alertDate.getTime();
-                            const daysAgo = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-                            let timeText = `Há ${daysAgo} dia${daysAgo !== 1 ? 's' : ''}`;
-                            if (daysAgo === 0) timeText = "Hoje";
-
-                             let iconClass = 'neutral';
-                             if (alert.nivelEstresse > 3.8) iconClass = 'negative';
-
-                            const li = document.createElement('li');
-                            li.innerHTML = `
-                                <i class="fa-solid fa-triangle-exclamation alert-icon ${iconClass}"></i>
-                                <span class="alert-text">Nível de estresse elevado (${alert.nivelEstresse}/5) detectado ${deptText}.</span>
-                                <span class="alert-time">${timeText}</span>
-                            `;
-                            alertsListContainer.appendChild(li);
-                        });
-                    }
-
-
-                } catch (error) {
-                    console.error("Erro ao carregar ou processar dados do dashboard:", error);
-                    dashboardContainer.innerHTML = '<p class="error-message">Ocorreu um erro ao carregar o painel. Tente novamente mais tarde.</p>';
-                }
-            }
-
-            // --- Inicia o carregamento ---
-            loadDashboardData();
-
-        }); // Fim do DOMContentLoaded
+        });
     </script>
 </body>
+
 </html>

@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindTrack - Crie sua Conta</title>
-    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KrDrjtyBKJ3c4fNUVdXwCQg0jbJiA1uA&sz=w200">
+    <title>AirMilhas - Cadastro</title>
+    <link rel="icon" href="./img/Airmilhas_Logo.png">
 
     <script src="firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -18,15 +18,16 @@
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
     <style>
         :root {
-            --bg-main: #F9FAFB;
-            --primary-gradient: linear-gradient(180deg, #2EC4B6 0%, #018B8B 100%);
-            --primary-accent: #2EC4B6;
-            --text-dark: #374151;
-            --text-light: #F9FAFB;
-            --text-muted: #9CA3AF;
-            --border-color: #E5E7EB;
+            --air-dark-blue: #0a192f;
+            --air-medium-blue: #112240;
+            --air-accent-blue: #233554;
+            --air-silver: #ccd6f6;
+            --air-slate: #8892b0;
+            --air-white: #ffffff;
+            --air-gradient: linear-gradient(180deg, #0a192f 0%, #112240 100%);
             --font-title: 'Montserrat', sans-serif;
             --font-body: 'Inter', sans-serif;
         }
@@ -39,8 +40,8 @@
 
         body {
             font-family: var(--font-body);
-            background-color: var(--bg-main);
-            color: var(--text-dark);
+            background-color: var(--air-dark-blue);
+            color: var(--air-silver);
             height: 100vh;
             display: flex;
         }
@@ -53,14 +54,16 @@
 
         .signup-branding {
             flex-basis: 45%;
-            background: var(--primary-gradient);
-            color: var(--text-light);
+            background: var(--air-gradient);
+            border-right: 1px solid var(--air-accent-blue);
+            color: var(--air-white);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 40px;
             text-align: center;
+            position: relative;
         }
 
         .logo {
@@ -73,6 +76,11 @@
             margin-bottom: 32px;
         }
 
+        .logo img {
+            width: 60px;
+            filter: drop-shadow(0 0 10px rgba(204, 214, 246, 0.3));
+        }
+
         .signup-branding h1 {
             font-family: var(--font-title);
             font-size: 28px;
@@ -82,14 +90,9 @@
             max-width: 400px;
         }
 
-        .signup-branding p {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.85);
-            max-width: 400px;
-        }
-
         .signup-form-area {
             flex-basis: 55%;
+            background-color: #0f172a;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -106,17 +109,18 @@
             font-family: var(--font-title);
             font-size: 32px;
             font-weight: 700;
+            color: var(--air-white);
             margin-bottom: 8px;
         }
 
         .signup-card .subtitle {
             font-size: 16px;
-            color: var(--text-muted);
+            color: var(--air-slate);
             margin-bottom: 32px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .form-group label {
@@ -124,38 +128,48 @@
             font-weight: 600;
             margin-bottom: 8px;
             font-size: 14px;
+            color: var(--air-silver);
         }
 
         .form-group input {
             width: 100%;
             padding: 12px 14px;
-            border: 1px solid var(--border-color);
+            background-color: var(--air-medium-blue);
+            border: 1px solid var(--air-accent-blue);
             border-radius: 8px;
             font-size: 16px;
+            color: var(--air-white);
             font-family: var(--font-body);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: var(--primary-accent);
-            box-shadow: 0 0 0 3px #E0F2F1;
+            border-color: var(--air-silver);
+            box-shadow: 0 0 0 3px rgba(204, 214, 246, 0.1);
         }
 
         .btn-submit {
             width: 100%;
             padding: 14px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            background-color: var(--primary-accent);
-            color: #fff;
-            margin-top: 24px;
+            background-color: var(--air-silver);
+            color: var(--air-dark-blue);
+            margin-top: 15px;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--air-white);
+            transform: translateY(-2px);
         }
 
         .btn-submit:disabled {
-            background-color: #9CA3AF;
+            background-color: var(--air-accent-blue);
             cursor: not-allowed;
         }
 
@@ -163,11 +177,11 @@
             text-align: center;
             margin-top: 24px;
             font-size: 14px;
-            color: var(--text-muted);
+            color: var(--air-slate);
         }
 
         .login-link a {
-            color: var(--primary-accent);
+            color: var(--air-silver);
             font-weight: 600;
             text-decoration: none;
         }
@@ -187,30 +201,33 @@
 <body>
     <div class="signup-container">
         <div class="signup-branding">
-            <div class="logo"><i class="fa-solid fa-leaf"></i><span>MindTrack</span></div>
-            <h1>Comece sua jornada para um bem-estar genuíno.</h1>
-            <p>Uma plataforma desenhada para transformar dados em ações concretas que beneficiam você e sua empresa.</p>
+            <div class="logo">
+                <img src="./img/Airmilhas_Logo.png" alt="AirMilhas Logo">
+                <span>AirMilhas</span>
+            </div>
+            <h1>Faça parte do time que transforma milhas em lucro.</h1>
+            <p>Cadastre-se para acessar as ferramentas de cotação, mentoria e gestão financeira.</p>
         </div>
         <div class="signup-form-area">
             <div class="signup-card">
                 <h2>Crie sua Conta</h2>
-                <p class="subtitle">Preencha os campos para iniciar o monitoramento do seu bem-estar.</p>
+                <p class="subtitle">Preencha os dados abaixo para solicitar acesso ao painel.</p>
                 <form id="signup-form">
                     <div class="form-group">
                         <label for="nome">Nome Completo</label>
-                        <input type="text" id="nome" placeholder="Seu nome completo" required>
+                        <input type="text" id="nome" placeholder="Seu nome" required>
                     </div>
                     <div class="form-group">
-                        <label for="email">Email Corporativo</label>
-                        <input type="email" id="email" placeholder="seu.email@empresa.com" required>
+                        <label for="email">E-mail Corporativo</label>
+                        <input type="email" id="email" placeholder="nome@airmilhas.com" required>
                     </div>
                     <div class="form-group">
                         <label for="departamento">Departamento</label>
-                        <input type="text" id="departamento" placeholder="Ex: Financeiro, TI, RH" required>
+                        <input type="text" id="departamento" placeholder="Ex: Vendas, Financeiro, Emissão" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Crie uma Senha</label>
-                        <input type="password" id="password" placeholder="Mínimo 8 caracteres" required>
+                        <input type="password" id="password" placeholder="Mínimo 6 caracteres" required>
                     </div>
                     <button type="submit" class="btn-submit">Criar Conta</button>
                 </form>
@@ -220,80 +237,39 @@
     </div>
 
     <script>
-        // =========================================================================
-        // 1. INICIALIZAÇÃO DO FIREBASE (ASSUMINDO QUE firebase-config.js E SDKs JÁ FORAM INCLUÍDOS)
-        // =========================================================================
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // =========================================================================
-        // 2. LÓGICA DO FORMULÁRIO DE CADASTRO MODIFICADA
-        // =========================================================================
         const signupForm = document.getElementById('signup-form');
         const submitButton = signupForm.querySelector('.btn-submit');
 
         signupForm.addEventListener('submit', async function (e) {
-            e.preventDefault(); // Impede o envio padrão
+            e.preventDefault();
 
             submitButton.disabled = true;
-            submitButton.textContent = 'Criando conta...';
+            submitButton.textContent = 'Processando...';
 
             const nome = document.getElementById('nome').value;
             const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const departamento = document.getElementById('departamento').value;
-            // Definindo Cargo e Nivel_Acesso como padrão no frontend
-            const cargo = "Colaborador";
-            const nivelAcesso = 5; // Usando número 5 para "Colaborador" (ajuste se necessário)
 
+            // --- LÓGICA DE SIMULAÇÃO (MOCK) ---
+            // Simula o tempo de criação de conta
+            setTimeout(() => {
+                // No protótipo, apenas confirmamos o sucesso e voltamos ao login
+                alert(`Sucesso! A conta para ${nome} (${email}) foi simulada.\n\nAgora use admin@airmilhas.com para entrar.`);
+                window.location.href = './index.html';
+            }, 1500);
+            // --- FIM DA SIMULAÇÃO ---
+
+            /* // Código real para quando você conectar o Firebase:
             try {
-                // 1. Criar o usuário no Firebase Authentication
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-
-                if (user) {
-                    console.log("Usuário criado no Auth:", user.uid);
-
-                    // 2. Salvar dados adicionais no Firestore
-                    // Usamos o UID do Auth como ID do documento na coleção 'users'
-                    await db.collection('users').doc(user.uid).set({
-                        nome: nome,
-                        email: email, // Armazenar email aqui também pode ser útil
-                        departamento: departamento,
-                        cargo: cargo,
-                        nivelAcesso: nivelAcesso,
-                        profilePicUrl: null // Inicialmente sem foto
-                        // NÃO SALVE A SENHA AQUI! O Auth cuida disso.
-                    });
-
-                    console.log("Dados salvos no Firestore para:", user.uid);
-
-                    alert('Conta criada com sucesso! Você será redirecionado para o login.');
-                    window.location.href = './index.html'; // Redireciona para o login 
-
-                } else {
-                    throw new Error('Não foi possível obter informações do usuário após a criação.');
-                }
-
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                await firebase.firestore().collection('users').doc(userCredential.user.uid).set({
+                    nome, email, departamento, cargo: "Colaborador", nivelAcesso: 5
+                });
+                window.location.href = './index.html';
             } catch (error) {
-                console.error('Erro ao criar conta:', error);
-                let friendlyMessage = 'Erro ao criar a conta.';
-
-                // Mapear erros comuns do Firebase Auth
-                if (error.code === 'auth/email-already-in-use') {
-                    friendlyMessage = 'Este email já está cadastrado. Tente fazer login.';
-                } else if (error.code === 'auth/invalid-email') {
-                    friendlyMessage = 'O formato do email é inválido.';
-                } else if (error.code === 'auth/weak-password') {
-                    friendlyMessage = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
-                }
-                // Adicionar tratamento para erros do Firestore se necessário (ex: falha de permissão)
-
-                alert(friendlyMessage + ` (${error.message})`);
+                alert('Erro: ' + error.message);
                 submitButton.disabled = false;
-                submitButton.textContent = 'Criar Conta'; // [cite: 316]
             }
+            */
         });
     </script>
 </body>

@@ -14,7 +14,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
@@ -27,7 +29,7 @@
             --air-slate: #8892b0;
             --air-white: #ffffff;
             --air-gradient: linear-gradient(180deg, #0a192f 0%, #112240 100%);
-            
+
             --font-title: 'Montserrat', sans-serif;
             --font-body: 'Inter', sans-serif;
         }
@@ -72,7 +74,10 @@
         .login-branding::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: url('https://www.transparenttextures.com/patterns/cubes.png');
             opacity: 0.05;
         }
@@ -113,7 +118,8 @@
         /* Lado Direito: Formulário */
         .login-form-area {
             flex-basis: 55%;
-            background-color: #0f172a; /* Tom levemente diferente para contraste */
+            background-color: #0f172a;
+            /* Tom levemente diferente para contraste */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -191,7 +197,9 @@
             text-decoration: none;
         }
 
-        .form-options a:hover { text-decoration: underline; }
+        .form-options a:hover {
+            text-decoration: underline;
+        }
 
         .btn-submit {
             width: 100%;
@@ -227,8 +235,13 @@
         }
 
         @media (max-width: 768px) {
-            .login-branding { display: none; }
-            .login-form-area { flex-basis: 100%; }
+            .login-branding {
+                display: none;
+            }
+
+            .login-form-area {
+                flex-basis: 100%;
+            }
         }
     </style>
 </head>
@@ -241,7 +254,8 @@
                 <span>AirMilhas</span>
             </div>
             <h1>Gestão Inteligente de Milhas e Viagens.</h1>
-            <p>Acesse o ecossistema AirMilhas para gerenciar emissões, mentorias e resultados financeiros em um só lugar.</p>
+            <p>Acesse o ecossistema AirMilhas para gerenciar emissões, mentorias e resultados financeiros em um só
+                lugar.</p>
         </div>
 
         <div class="login-form-area">
@@ -279,11 +293,18 @@
     </div>
 
     <script>
-        // Inicialização do Firebase (usando a config do seu firebase-config.js)
-        firebase.initializeApp(firebaseConfig);
-
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        // Simulação de credenciais para o protótipo
+        const MOCK_ADMIN = {
+            email: "admin@airmilhas.com",
+            password: "senha123",
+            data: {
+                nome: "Administrador AirMilhas",
+                cargo: "Diretor de Operações",
+                nivelAcesso: 1, // Nível alto para ver tudo
+                profilePicUrl: null,
+                departamento: "Diretoria"
+            }
+        };
 
         const loginForm = document.getElementById('login-form');
         const submitButton = loginForm.querySelector('.btn-submit');
@@ -297,35 +318,56 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
+            // --- LÓGICA DE SIMULAÇÃO PARA O PROTÓTIPO ---
+            if (email === MOCK_ADMIN.email && password === MOCK_ADMIN.password) {
+                // Simula um pequeno delay de rede para parecer real
+                setTimeout(() => {
+                    const fullUserData = {
+                        uid: "simulated-admin-id",
+                        email: MOCK_ADMIN.email,
+                        ...MOCK_ADMIN.data
+                    };
+
+                    // Salva no localStorage para que a sidebar.js consiga ler
+                    localStorage.setItem('airmilhasToken', fullUserData.uid);
+                    localStorage.setItem('airmilhasUser', JSON.stringify(fullUserData));
+
+                    alert('Login de simulação realizado com sucesso!');
+                    window.location.href = './Gerente.html';
+                }, 1000);
+                return;
+            }
+            // --- FIM DA SIMULAÇÃO ---
+
+            // Lógica real do Firebase (caso você queira manter para o futuro)
             try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
+                // Se não for o admin fake, tenta o Firebase
+                if (typeof firebase !== 'undefined') {
+                    const auth = firebase.auth();
+                    const db = firebase.firestore();
 
-                if (user) {
-                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
 
-                    if (userDoc.exists) {
-                        const userData = userDoc.data();
-
-                        const fullUserData = {
-                            uid: user.uid,
-                            email: user.email,
-                            nome: userData.nome || 'Membro AirMilhas',
-                            cargo: userData.cargo || 'Operacional',
-                            nivelAcesso: userData.nivelAcesso !== undefined ? userData.nivelAcesso : 99,
-                            profilePicUrl: userData.profilePicUrl || null
-                        };
-
-                        // Salva para uso na sidebar.js adaptada
-                        localStorage.setItem('mindtrackToken', user.uid); 
-                        localStorage.setItem('mindtrackUser', JSON.stringify(fullUserData));
-
-                        // Redireciona para o Painel Geral (seu index de dashboard)
-                        window.location.href = './Gerente.html'; 
-
-                    } else {
-                        throw new Error('Perfil não encontrado no banco de dados.');
+                    if (user) {
+                        const userDoc = await db.collection('users').doc(user.uid).get();
+                        if (userDoc.exists) {
+                            const userData = userDoc.data();
+                            const fullUserData = {
+                                uid: user.uid,
+                                email: user.email,
+                                nome: userData.nome,
+                                cargo: userData.cargo,
+                                nivelAcesso: userData.nivelAcesso,
+                                profilePicUrl: userData.profilePicUrl
+                            };
+                            localStorage.setItem('airmilhasToken', user.uid);
+                            localStorage.setItem('airmilhasUser', JSON.stringify(fullUserData));
+                            window.location.href = './Gerente.html';
+                        }
                     }
+                } else {
+                    throw new Error('Credenciais inválidas.');
                 }
             } catch (error) {
                 console.error('Erro:', error);

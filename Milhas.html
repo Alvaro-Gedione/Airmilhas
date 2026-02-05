@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirMilhas - Gestão de Milhas</title>
+    <link rel="icon" href="./img/Airmilhas_Logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        :root {
+            --air-dark-blue: #0a192f;
+            --air-medium-blue: #112240;
+            --air-accent-blue: #233554;
+            --air-silver: #ccd6f6;
+            --air-slate: #8892b0;
+            --air-white: #ffffff;
+            --color-positive: #4ade80;
+            --font-title: 'Montserrat', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--air-dark-blue);
+            color: var(--air-silver);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background-color: #0f172a;
+        }
+
+        /* Cabeçalho de Perfil */
+        .profile-header {
+            background: var(--air-medium-blue);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid var(--air-accent-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .client-info h1 {
+            font-family: var(--font-title);
+            font-size: 24px;
+            color: var(--air-white);
+        }
+
+        .score-badge {
+            background: rgba(74, 222, 128, 0.1);
+            color: var(--color-positive);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        /* Sistema de Abas Internas */
+        .tabs-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--air-accent-blue);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--air-slate);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.3s;
+            border-radius: 8px;
+        }
+
+        .tab-btn.active {
+            background: var(--air-accent-blue);
+            color: var(--air-white);
+        }
+
+        /* Grid de Formulário */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-section {
+            background: var(--air-medium-blue);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--air-accent-blue);
+        }
+
+        .form-section h3 {
+            font-family: var(--font-title);
+            font-size: 16px;
+            color: var(--air-white);
+            margin-bottom: 15px;
+            border-left: 3px solid var(--air-silver);
+            padding-left: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--air-slate);
+            margin-bottom: 5px;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            background: var(--air-dark-blue);
+            border: 1px solid var(--air-accent-blue);
+            padding: 10px;
+            border-radius: 6px;
+            color: var(--air-white);
+            font-size: 14px;
+        }
+
+        /* Widgets de Resumo de Milhas */
+        .miles-inventory {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mile-card {
+            background: var(--air-accent-blue);
+            padding: 15px;
+            border-radius: 10px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .mile-card img {
+            height: 20px;
+            margin-bottom: 8px;
+            filter: grayscale(1) brightness(2);
+        }
+
+        .mile-card p {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--air-white);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="main-content">
+        <div class="profile-header">
+            <div class="client-info">
+                <h1>Gestão de Estratégia: João Silva</h1>
+                <div class="score-badge">Score Serasa: 840</div>
+                <span style="margin-left: 15px; font-size: 13px; color: var(--air-slate);">Gasto Mensal: R$
+                    12.500,00</span>
+            </div>
+            <button
+                style="background: var(--color-positive); color: var(--air-dark-blue); border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer;">Salvar
+                Alterações</button>
+        </div>
+
+        <div class="miles-inventory">
+            <div class="mile-card"><span>Livelo</span>
+                <p>125.000</p>
+            </div>
+            <div class="mile-card"><span>Esfera</span>
+                <p>42.300</p>
+            </div>
+            <div class="mile-card"><span>Smiles</span>
+                <p>89.000</p>
+            </div>
+            <div class="mile-card"><span>Latam Pass</span>
+                <p>12.000</p>
+            </div>
+        </div>
+
+        <nav class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('diagnostico')">Diagnóstico & Financeiro</button>
+            <button class="tab-btn" onclick="switchTab('consumo')">Hábitos & Compras</button>
+            <button class="tab-btn" onclick="switchTab('viagens')">Planejamento de Viagens</button>
+            <button class="tab-btn" onclick="switchTab('pessoais')">Dados Pessoais</button>
+        </nav>
+
+        <div id="diagnostico" class="tab-content">
+            <div class="form-grid">
+                <div class="form-section">
+                    <h3>Inventário de Cartões</h3>
+                    <div class="input-group">
+                        <label>Cartão Principal (PF)</label>
+                        <input type="text" value="Visa Infinite - Banco do Brasil">
+                    </div>
+                    <div class="input-group">
+                        <label>Cartão Secundário (PJ)</label>
+                        <input type="text" placeholder="Ex: C6 Carbon Black">
+                    </div>
+                    <div class="input-group">
+                        <label>Anuidade Atual (R$)</label>
+                        <input type="number" value="1200">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Crédito e Investimentos</h3>
+                    <div class="input-group">
+                        <label>Renda Mensal Comprovada</label>
+                        <input type="text" value="R$ 15.000,00">
+                    </div>
+                    <div class="input-group">
+                        <label>Possui Gerente?</label>
+                        <select>
+                            <option>Sim (Van Gogh)</option>
+                            <option>Não</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Investimento em CDB (Capacidade)</label>
+                        <input type="text" placeholder="R$ 50.000,00">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="viagens" class="tab-content" style="display:none;">
+            <div class="form-grid">
+                <div class="form-section" style="grid-column: span 2;">
+                    <h3>Objetivos de Viagem</h3>
+                    <div class="input-group">
+                        <label>Destinos Desejados (Próximos 365 dias)</label>
+                        <textarea rows="3" placeholder="Ex: Paris em Setembro, Orlando em Janeiro..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>Viagem dos Sonhos (Descrição)</label>
+                        <textarea rows="2" placeholder="Descreva a experiência ideal..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="sidebar.js"></script>
+    <script>
+        function switchTab(tabId) {
+            // Esconde todas as abas
+            document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+            // Remove active dos botões
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Mostra a aba selecionada
+            document.getElementById(tabId).style.display = 'block';
+            // Adiciona active no botão clicado
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+
+</html>
